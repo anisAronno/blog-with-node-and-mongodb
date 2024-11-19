@@ -1,5 +1,5 @@
 const { execFileSync } = require('child_process');
-const Logger = require('./Logger');
+const Logger = require('../utils/Logger');
 
 class CommandExecutor {
   /**

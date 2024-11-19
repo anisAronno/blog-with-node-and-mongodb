@@ -2,12 +2,12 @@
 
 const express = require('express');
 const config = require('./src/config');
-const AuthMiddleware = require('./src/middleware/AuthMiddleware');
 const LoggingMiddleware = require('./src/middleware/LoggingMiddleware');
 const ErrorHandler = require('./src/middleware/ErrorHandler');
 const routes = require('./src/routes');
 const { HTTP_STATUS_CODE } = require('./src/config/constants.js');
 const connectToDatabase = require('./src/db');
+const Logger = require('./src/utils/Logger');
 
 class AppServer {
   constructor() {
@@ -21,7 +21,7 @@ class AppServer {
   async loadGlobalConstantVariable() {
     global.APP_CONFIG = config;
     global.HTTP_STATUS_CODE = HTTP_STATUS_CODE;
-    global.DB = await connectToDatabase();
+    await connectToDatabase();
   }
 
   setupMiddleware() {
@@ -33,19 +33,22 @@ class AppServer {
 
     // Custom middleware
     this.app.use(LoggingMiddleware.requestLogger);
-    this.app.use(AuthMiddleware.validateApiKey);
   }
 
   setupRoutes() {
-    // pass from home route to routes file
     this.app.use('/api', routes);
 
-    // 404 handler
-    this.app.use((req, res) => {
-      res.status(HTTP_STATUS_CODE.NOT_FOUND).json({
-        success: false,
-        message: 'Resource not found',
-      });
+    this.app.use('/', (req, res) => {
+      if (req.path === '/') {
+        res.status(HTTP_STATUS_CODE.OK).json({ message: 'Service is running' });
+      } else {
+        Logger.log(req.path);
+
+        res.status(HTTP_STATUS_CODE.NOT_FOUND).json({
+          success: false,
+          message: 'Resource not found',
+        });
+      }
     });
   }
 
@@ -55,7 +58,7 @@ class AppServer {
 
   start() {
     return this.app.listen(APP_CONFIG.PORT, () => {
-      console.log(
+      Logger.info(
         'SERVER',
         `Application started on port ${APP_CONFIG.PORT} in ${APP_CONFIG.ENVIRONMENT} mode`
       );

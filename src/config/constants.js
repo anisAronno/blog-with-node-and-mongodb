@@ -7,8 +7,29 @@ const HTTP_STATUS_CODE = {
   METHOD_NOT_ALLOWED: 405,
   UNPROCESSABLE_ENTITY: 422,
   CREATED: 201,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+};
+
+const BLOG_ROUTES = {
+  GET_USER_BLOGS: '/blogs',
+  GET_ALL_BLOGS: '/blogs-all',
+  CREATE: '/blog',
+  GET_BY_ID: '/blog/:id',
+  UPDATE_BY_ID: '/blog/:id',
+  PUBLISH: '/blog/:id/publish',
+  DELETE_BY_ID: '/blog/:id',
+};
+
+const USER_ROUTES = {
+  GET_ALL: '/users',
+  GET_BY_ID: '/user/:id',
+  UPDATE_BY_ID: '/user/:id',
+  DELETE_BY_ID: '/user/:id',
 };
 
 module.exports = {
   HTTP_STATUS_CODE,
+  BLOG_ROUTES,
+  USER_ROUTES,
 };

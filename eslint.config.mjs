@@ -11,7 +11,6 @@ export default [
         ...globals.node,
         APP_CONFIG: 'readonly',
         HTTP_STATUS_CODE: 'readonly',
-        DB: 'readonly',
         // Add your custom global variables
       },
     },

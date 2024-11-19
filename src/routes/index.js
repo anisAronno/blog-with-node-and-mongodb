@@ -1,15 +1,111 @@
-const express = require('express');
-const router = express.Router();
-const HomeController = require('../controllers/HomeController.js');
+const router = require('express').Router();
 const BlogController = require('../controllers/BlogController.js');
+const UserController = require('../controllers/UserController.js');
+const AuthMiddleware = require('../middleware/AuthMiddleware.js');
+const AuthController = require('../controllers/AuthController.js');
+const { BLOG_ROUTES, USER_ROUTES } = require('../config/constants.js');
+/**
+ * -------------------------------------
+ * Blog management
+ * -------------------------------------
+ */
+router.get(
+  BLOG_ROUTES.GET_ALL_BLOGS,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin']),
+  BlogController.getAllBlogs
+);
 
-// Create instances
-const homeController = new HomeController();
-const blogController = new BlogController();
+router.get(
+  BLOG_ROUTES.GET_USER_BLOGS,
+  AuthMiddleware.authenticate,
+  BlogController.getUserBlogs
+);
 
-// Bind the controller methods
-router.get('/', homeController.healthCheck);
-router.get('/blogs', blogController.index);
-router.post('/blog', blogController.store);
+router.post(
+  BLOG_ROUTES.CREATE,
+  AuthMiddleware.authenticate,
+  BlogController.createBlog
+);
+
+router.get(BLOG_ROUTES.GET_BY_ID, BlogController.getBlogById);
+
+router.put(
+  BLOG_ROUTES.UPDATE_BY_ID,
+  AuthMiddleware.authenticate,
+  BlogController.updateBlog
+);
+
+router.patch(
+  BLOG_ROUTES.PUBLISH,
+  AuthMiddleware.authenticate,
+  BlogController.publishBlog
+);
+
+router.delete(
+  BLOG_ROUTES.DELETE_BY_ID,
+  AuthMiddleware.authenticate,
+  BlogController.deleteBlog
+);
+
+/**
+ * -------------------------------------
+ * Authentication management
+ * -------------------------------------
+ */
+router.post('/login', AuthController.login);
+
+router.post('/register', AuthController.register);
+
+router.post('/logout', AuthMiddleware.authenticate, AuthController.logout);
+
+router.post('/refresh-token', AuthController.refreshToken);
+
+router.get('/me', AuthMiddleware.authenticate, AuthController.me);
+
+router.post(
+  '/change-password',
+  AuthMiddleware.authenticate,
+  AuthController.changePassword
+);
+
+router.post(
+  '/update-profile',
+  AuthMiddleware.authenticate,
+  AuthController.updateProfile
+);
+
+/**
+ * -------------------------------------
+ * User management
+ * -------------------------------------
+ */
+router.get(
+  USER_ROUTES.GET_ALL,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin']),
+  UserController.getAllUsers
+);
+
+router.get(
+  USER_ROUTES.GET_BY_ID,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin']),
+  UserController.getUserById
+);
+
+router.put(
+  USER_ROUTES.UPDATE_BY_ID,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin']),
+  UserController.updateUser
+);
+
+router.delete(
+  USER_ROUTES.DELETE_BY_ID,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin']),
+  UserController.deleteUser
+);
 
 module.exports = router;

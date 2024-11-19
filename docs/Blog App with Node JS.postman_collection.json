@@ -1,0 +1,544 @@
+{
+	"info": {
+		"_postman_id": "d4c2f69b-64ab-419e-b105-481dfef43077",
+		"name": "Blog App with Node JS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15228368",
+		"_collection_link": "https://lively-zodiac-855820.postman.co/workspace/My-Workspace~bcd0df4b-5f70-4276-8b4a-ef5845357be1/collection/15228368-d4c2f69b-64ab-419e-b105-481dfef43077?action=share&source=collection_link&creator=15228368"
+	},
+	"item": [
+		{
+			"name": "Blog",
+			"item": [
+				{
+					"name": "Create Blog",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Blog Title\",\n    \"description\": \"Description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blog",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blog"
+							]
+						},
+						"description": "### API POST /api/blog\n\nThis endpoint allows the client to create a new blog post.\n\n#### Request Body\n\n- raw (application/json)\n    \n    - title (string): The title of the blog post.\n        \n    - description (string): The description of the blog post.\n        \n\n#### Response\n\nThe response is a JSON object with the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"success\": {\n      \"type\": \"boolean\"\n    },\n    \"data\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"title\": {\n          \"type\": \"string\"\n        },\n        \"description\": {\n          \"type\": \"string\"\n        },\n        \"author\": {\n          \"type\": \"string\"\n        },\n        \"tags\": {\n          \"type\": \"array\",\n          \"items\": {}\n        },\n        \"categories\": {\n          \"type\": \"array\",\n          \"items\": {}\n        },\n        \"published\": {\n          \"type\": \"boolean\"\n        },\n        \"published_at\": {\n          \"type\": \"string\",\n          \"format\": \"date-time\"\n        },\n        \"_id\": {\n          \"type\": \"string\"\n        },\n        \"createdAt\": {\n          \"type\": \"string\",\n          \"format\": \"date-time\"\n        },\n        \"updatedAt\": {\n          \"type\": \"string\",\n          \"format\": \"date-time\"\n        },\n        \"__v\": {\n          \"type\": \"number\"\n        }\n      }\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2NjNWMyYWY1YmIzYjUwNzkxMjBhYyIsImVtYWlsIjoiYW5pc0BhbmljaHVyLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTczMjAzNjAzNCwiZXhwIjoxNzMyMjUyMDM0fQ.ztaDDCuuYnijtOo9Ov2uH9OZ38_JJvIWNEn5amH6Cgc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Blog Title Edited\",\n    \"description\": \"Description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blog/673cbb2dda54a400d8ebd39b",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blog",
+								"673cbb2dda54a400d8ebd39b"
+							]
+						},
+						"description": "This API endpoint allows you to update a specific blog by sending an HTTP PUT request to the specified URL. The request should include a JSON payload in the raw request body, with the \"title\" and \"description\" fields to update the blog's title and description.\n\n### Request Body\n\n- `title` (string): The updated title of the blog.\n    \n- `description` (string): The updated description of the blog.\n    \n\n### Response\n\nThe response will include the updated details of the blog, confirming the successful update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Blog",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blog/673cbb2dda54a400d8ebd39b",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blog",
+								"673cbb2dda54a400d8ebd39b"
+							]
+						},
+						"description": "### Delete Blog Post\n\nThis endpoint is used to delete a specific blog post.\n\n#### Request\n\n- Method: DELETE\n    \n- Endpoint: `{{host}}/api/blog/673cbb2dda54a400d8ebd39b`\n    \n\n#### Response\n\nThe response for this request is a JSON schema describing the structure of the response body."
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Blogs by User",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Blog Title\",\n    \"description\": \"Description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blogs",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blogs"
+							]
+						},
+						"description": "This endpoint makes an HTTP GET request to retrieve a list of blogs from the server. The request does not require any parameters or request body. The response will include a list of blog objects, each containing a title and description for the blog. The response will provide the details for each blog available on the server."
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch ALL Blogs",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Blog Title\",\n    \"description\": \"Description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blogs-all",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blogs-all"
+							]
+						},
+						"description": "### GET /api/blogs-all\n\nThis endpoint retrieves all the blogs available.\n\n#### Request\n\nNo request body is required for this endpoint.\n\n#### Response\n\nThe response will be in JSON format and will have the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"success\": {\n      \"type\": \"boolean\"\n    },\n    \"blogs\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"_id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"description\": {\n            \"type\": \"string\"\n          },\n          \"author\": {\n            \"type\": \"string\"\n          },\n          \"tags\": {\n            \"type\": \"array\"\n          },\n          \"categories\": {\n            \"type\": \"array\"\n          },\n          \"published\": {\n            \"type\": \"boolean\"\n          },\n          \"published_at\": {\n            \"type\": [\"string\", \"null\"]\n          },\n          \"createdAt\": {\n            \"type\": \"string\"\n          },\n          \"updatedAt\": {\n            \"type\": \"string\"\n          },\n          \"__v\": {\n            \"type\": \"integer\"\n          }\n        }\n      }\n    },\n    \"pagination\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"page\": {\n          \"type\": \"integer\"\n        },\n        \"limit\": {\n          \"type\": \"integer\"\n        },\n        \"total\": {\n          \"type\": \"integer\"\n        },\n        \"totalPages\": {\n          \"type\": \"integer\"\n        }\n      }\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Single Blog",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Blog Title\",\n    \"description\": \"Description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blog/673cb449a4556e872f8af101",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blog",
+								"673cb449a4556e872f8af101"
+							]
+						},
+						"description": "\nThis endpoint retrieves a specific blog with the given ID. The response for this request can be documented as a JSON schema as follows:\n\n```json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"id\": {\n      \"type\": \"string\"\n    },\n    \"title\": {\n      \"type\": \"string\"\n    },\n    \"description\": {\n      \"type\": \"string\"\n    },\n    \"author\": {\n      \"type\": \"string\"\n    },\n    \"date\": {\n      \"type\": \"string\",\n      \"format\": \"date-time\"\n    }\n  }\n}\n```\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Blog",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Blog Title\",\n    \"description\": \"Description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/blog/673cb449a4556e872f8af101",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"blog",
+								"673cb449a4556e872f8af101"
+							]
+						},
+						"description": "\n# Get Blog Details\n\nThis endpoint retrieves the details of a specific blog identified by the provided ID.\n\n### Request Body\n- title (string, required): The title of the blog.\n- description (string, required): The description of the blog.\n\n### Response\nThe response will include the details of the blog such as its title, description, author, and publication date.\n\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Update User By Admin",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"name\": \"Anis Aronno 2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/user/673cb2dac1d50716aecd2cae",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"673cb2dac1d50716aecd2cae"
+							]
+						},
+						"description": "\n# Update User Details\n\nThis API endpoint is used to update the details of a specific user.\n\n## Request\n- Method: PUT\n- Endpoint: `{{host}}/api/user/673cb2dac1d50716aecd2cae`\n- Body:\n  - name (string, required): The updated name of the user.\n\n## Response\nThe response for this request is a JSON object with the updated user details. Below is the JSON schema for the response:\n\n```json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"userId\": {\n      \"type\": \"string\"\n    },\n    \"name\": {\n      \"type\": \"string\"\n    },\n    \"email\": {\n      \"type\": \"string\"\n    },\n    \"createdAt\": {\n      \"type\": \"string\",\n      \"format\": \"date-time\"\n    },\n    \"updatedAt\": {\n      \"type\": \"string\",\n      \"format\": \"date-time\"\n    }\n  }\n}\n```\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/users",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "\n### Retrieve Users\n\nThis endpoint makes an HTTP GET request to retrieve a list of users.\n\n#### Request\n\nThe request does not require a request body. It simply makes a GET request to the `/api/users` endpoint.\n\n#### Response\n\nThe response will be a JSON object representing the list of users. Below is a JSON schema representing the structure of the response:\n\n```json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"users\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\": {\n            \"type\": \"string\"\n          },\n          \"username\": {\n            \"type\": \"string\"\n          },\n          \"email\": {\n            \"type\": \"string\"\n          }\n          // ... other user properties\n        }\n      }\n    }\n  }\n}\n```\n\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Single Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/user/673cd1315fefe599eb0c388a",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"673cd1315fefe599eb0c388a"
+							]
+						},
+						"description": "\n### Get User Details\nThis endpoint retrieves the details of a specific user identified by their unique ID.\n\n#### Request Body\nThis request does not require a request body.\n\n#### Response Body\n- `id`: (string) The unique identifier of the user.\n- `name`: (string) The name of the user.\n- `email`: (string) The email address of the user.\n- `status`: (string) The status of the user account.\n\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/user/673cd0c75fefe599eb0c387c",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"673cd0c75fefe599eb0c387c"
+							]
+						},
+						"description": "This endpoint sends an HTTP DELETE request to the specified user resource. Upon successful deletion, the response will include a JSON schema detailing the structure of the response data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anis\",\n    \"email\" : \"anisAronno2@anichur.com\",\n    \"password\": \"password\",\n    \"username\": \"anisAronno2\",\n    \"role\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/register",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						},
+						"description": "\nThe `POST /api/register` endpoint is used to register a new user. The request should include the user's name, email, password, username, and role in the request body.\n\n### Request Body\n- `name`: (string) The name of the user.\n- `email`: (string) The email address of the user.\n- `password`: (string) The password for the user's account.\n- `username`: (string) The username chosen by the user.\n- `role`: (string) The role of the user (e.g., admin, user).\n\n### Response\nThe response of this request is a JSON schema representing the structure of the response object. The specific properties and their types will be defined in the JSON schema format.\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anichur Rahaman Aronno\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/update-profile",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"update-profile"
+							]
+						},
+						"description": "\n### Update Profile\n\nThis endpoint is used to update the user's profile information.\n\n#### Request Body\n- name (string, required): The updated name of the user.\n\n#### Response\nThe response for this request follows the JSON schema below:\n```json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n```\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"oldPassword\": \"anis3139\",\n    \"newPassword\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/change-password",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"change-password"
+							]
+						},
+						"description": "\n### Change Password\n\nThis endpoint allows the user to change their password by sending a POST request to the specified URL.\n\n#### Request Body\n- `oldPassword` (string) : The user's current password.\n- `newPassword` (string) : The new password that the user wants to set.\n\n#### Response\nThe response will include the updated user information or a success message upon successful password change. In case of any error, appropriate error messages will be returned.\n\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"admin@anichur.com\",\n    \"password\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						},
+						"description": "\n### Login API\n\nThis API endpoint is used to authenticate and login a user.\n\n#### Request Body\n- `email` (string): The email of the user.\n- `password` (string): The password of the user.\n\nExample:\n```json\n{\n  \"email\": \"admin@anichur.com\",\n  \"password\": \"password\"\n}\n```\n\n#### Response\nThe response will include the authentication token and user information upon successful login.\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2NiMmRhYzFkNTA3MTZhZWNkMmNhZSIsImVtYWlsIjoiYWRtaW5AYW5pY2h1ci5jb20iLCJyb2xlIjoiYWRtaW4iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTczMjAzNjUwNCwiZXhwIjoxNzMyNjQxMzA0fQ.N3k-xxRTma51h4nBWfdApBe7eHnmv7Ny2k15wBeakqg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/refresh-token",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"refresh-token"
+							]
+						},
+						"description": "\n### Refresh Token\nThis endpoint is used to refresh the access token by providing the refresh token.\n\n#### Request Body\n- `refreshToken` (string): The refresh token used to obtain a new access token.\n\n#### Response\nThe response will contain the updated access token and possibly a new refresh token.\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2NkMTMxNWZlZmU1OTllYjBjMzg4YSIsImVtYWlsIjoiYW5pc2Fyb25ub0BhbmljaHVyLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTczMjAzODk2MSwiZXhwIjoxNzMyMjU0OTYxfQ.kZprpJEatNej0-fJSC_kyXk52nBkqi874i2c7P6Pc-Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/me",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"me"
+							]
+						},
+						"description": "\n### Retrieve User Information\n\nThis endpoint is used to retrieve the user's information.\n\n#### Request Body\nThis request does not require a request body.\n\n#### Response\n- `id`: (string) The unique identifier for the user.\n- `name`: (string) The name of the user.\n- `email`: (string) The email address of the user.\n- `role`: (string) The role of the user in the system.\n\n"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2NkMWIyNWZlZmU1OTllYjBjMzhiMyIsImVtYWlsIjoiYW5pc2Fyb25ubzJAYW5pY2h1ci5jb20iLCJyb2xlIjoiYWRtaW4iLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzMyMDM5MDkwLCJleHAiOjE3MzIyNTUwOTB9.y1FDDXGSUWaeIP3RwhTDr2hqalMv9PRH9mPCkVMEMJ8",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:9000/",
+			"type": "string"
+		}
+	]
+}

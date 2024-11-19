@@ -1,24 +1,19 @@
 // db.js
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 const Logger = require('../utils/Logger');
-
-let dbInstance;
+const APP_CONFIG = require('../config');
 
 const connectToDatabase = async () => {
-  if (!dbInstance) {
-    try {
-      const client = new MongoClient(APP_CONFIG.MONGO_URI, {
-        useUnifiedTopology: true,
-      });
-      await client.connect();
-      Logger.log('Connected to MongoDB');
-      dbInstance = client.db(APP_CONFIG.MONGO_DB_NAME);
-    } catch (error) {
-      Logger.error('Failed to connect to MongoDB:', error);
-      process.exit(1); // Exit the app if the connection fails
-    }
+  try {
+    const connection = mongoose.connect(APP_CONFIG.MONGO_DB_URI);
+    Logger.info(
+      `Successfully connected to MongoDB database: ${APP_CONFIG.MONGODB_NAME}`
+    );
+    return connection;
+  } catch (error) {
+    Logger.error('Failed to connect to MongoDB:', error);
+    process.exit(1); // Exit the app if the connection fails
   }
-  return dbInstance;
 };
 
 module.exports = connectToDatabase;

@@ -1,7 +1,7 @@
 // src/utils/BaseHelper.js
 const AppseroError = require('../errors/AppseroError.js');
 const crypto = require('crypto');
-const Logger = require('./Logger');
+const Logger = require('../utils/Logger');
 
 class BaseHelper {
   /**
