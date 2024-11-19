@@ -1,0 +1,77 @@
+'use strict';
+
+const express = require('express');
+const config = require('./src/config');
+const AuthMiddleware = require('./src/middleware/AuthMiddleware');
+const LoggingMiddleware = require('./src/middleware/LoggingMiddleware');
+const ErrorHandler = require('./src/middleware/ErrorHandler');
+const routes = require('./src/routes');
+const { HTTP_STATUS_CODE } = require('./src/config/constants.js');
+const connectToDatabase = require('./src/db');
+
+class AppServer {
+  constructor() {
+    this.app = express();
+    this.loadGlobalConstantVariable();
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupErrorHandling();
+  }
+
+  async loadGlobalConstantVariable() {
+    global.APP_CONFIG = config;
+    global.HTTP_STATUS_CODE = HTTP_STATUS_CODE;
+    global.DB = await connectToDatabase();
+  }
+
+  setupMiddleware() {
+    // Basic middleware
+    this.app.use(express.json({ limit: APP_CONFIG.REQUEST_LIMIT }));
+    this.app.use(
+      express.urlencoded({ extended: true, limit: APP_CONFIG.REQUEST_LIMIT })
+    );
+
+    // Custom middleware
+    this.app.use(LoggingMiddleware.requestLogger);
+    this.app.use(AuthMiddleware.validateApiKey);
+  }
+
+  setupRoutes() {
+    // pass from home route to routes file
+    this.app.use('/api', routes);
+
+    // 404 handler
+    this.app.use((req, res) => {
+      res.status(HTTP_STATUS_CODE.NOT_FOUND).json({
+        success: false,
+        message: 'Resource not found',
+      });
+    });
+  }
+
+  setupErrorHandling() {
+    this.app.use(ErrorHandler.handleErrors);
+  }
+
+  start() {
+    return this.app.listen(APP_CONFIG.PORT, () => {
+      console.log(
+        'SERVER',
+        `Application started on port ${APP_CONFIG.PORT} in ${APP_CONFIG.ENVIRONMENT} mode`
+      );
+    });
+  }
+
+  getApp() {
+    return this.app;
+  }
+}
+
+// Create and start server instance if running directly
+if (require.main === module) {
+  const server = new AppServer();
+  server.start();
+}
+
+// Export server class for testing
+module.exports = AppServer;
