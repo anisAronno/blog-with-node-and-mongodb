@@ -2,12 +2,12 @@
 
 const express = require('express');
 const config = require('./src/config');
-const AuthMiddleware = require('./src/middleware/AuthMiddleware');
 const LoggingMiddleware = require('./src/middleware/LoggingMiddleware');
 const ErrorHandler = require('./src/middleware/ErrorHandler');
 const routes = require('./src/routes');
+const shopRoute = require('./src/routes/shop');
+const adminRoute = require('./src/routes/admin');
 const { HTTP_STATUS_CODE } = require('./src/config/constants.js');
-const connectToDatabase = require('./src/db');
 
 class AppServer {
   constructor() {
@@ -21,7 +21,6 @@ class AppServer {
   async loadGlobalConstantVariable() {
     global.APP_CONFIG = config;
     global.HTTP_STATUS_CODE = HTTP_STATUS_CODE;
-    global.DB = await connectToDatabase();
   }
 
   setupMiddleware() {
@@ -33,12 +32,13 @@ class AppServer {
 
     // Custom middleware
     this.app.use(LoggingMiddleware.requestLogger);
-    this.app.use(AuthMiddleware.validateApiKey);
   }
 
   setupRoutes() {
     // pass from home route to routes file
     this.app.use('/api', routes);
+    this.app.use('/api/shop', shopRoute);
+    this.app.use('/api/admin', adminRoute);
 
     // 404 handler
     this.app.use((req, res) => {
