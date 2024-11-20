@@ -1,6 +1,5 @@
 const Category = require('../models/Category');
 const Blog = require('../models/Blog');
-const MongooseQueryBuilder = require('../utils/MongooseQueryBuilder');
 
 class CategoryService {
   // Create a new category
@@ -14,8 +13,7 @@ class CategoryService {
 
   // Get all categories with pagination
   async getAllCategories(queryParams = {}) {
-    return new MongooseQueryBuilder(Category)
-      .search(queryParams.search, ['name', 'description'])
+    return Category.search(queryParams.search, ['name', 'description'])
       .where('name', queryParams.name)
       .where('description', queryParams.description)
       .paginate(queryParams.page, queryParams.limit)
@@ -65,8 +63,7 @@ class CategoryService {
   }
 
   async getBlogsByCategoryId(categoryId, queryParams = {}) {
-    return new MongooseQueryBuilder(Blog)
-      .search(queryParams.search, ['title', 'description'])
+    return Blog.search(queryParams.search, ['title', 'description'])
       .where('tags', { $in: [categoryId] })
       .where('title', queryParams.title)
       .where('description', queryParams.description)
@@ -77,14 +74,13 @@ class CategoryService {
 
   // Get all subcategories
   async getSubcategories(parentCategoryId, queryParams = {}) {
-    return new MongooseQueryBuilder(Category)
-    .search(queryParams.search, ['name', 'description'])
-    .where('parentCategory', parentCategoryId)
-    .where('name', queryParams.name)
-    .where('description', queryParams.description)
-    .paginate(queryParams.page, queryParams.limit)
-    .sort('createdAt')
-    .execute();
+    return Category.search(queryParams.search, ['name', 'description'])
+      .where('parentCategory', parentCategoryId)
+      .where('name', queryParams.name)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 }
 

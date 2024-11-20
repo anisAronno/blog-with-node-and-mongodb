@@ -1,16 +1,14 @@
 const User = require('../models/User');
-const MongooseQueryBuilder = require('../utils/MongooseQueryBuilder');
 
 class UserService {
   // getAllUsers method
   async getAllUsers(queryParams = {}) {
-    return new MongooseQueryBuilder(User)
-    .search(queryParams.search, ['name', 'email'])
-    .where('name', queryParams.name)
-    .where('email', queryParams.email)
-    .paginate(queryParams.page, queryParams.limit)
-    .sort('createdAt')
-    .execute();
+    return User.search(queryParams.search, ['name', 'email'])
+      .where('name', queryParams.name)
+      .where('email', queryParams.email)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 
   // getUserById method

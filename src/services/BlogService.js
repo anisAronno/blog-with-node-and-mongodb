@@ -1,5 +1,4 @@
 const Blog = require('../models/Blog');
-const MongooseQueryBuilder = require('../utils/MongooseQueryBuilder');
 class BlogService {
   // Create a new blog
   async create(blogData, authorId) {
@@ -18,25 +17,23 @@ class BlogService {
 
   // Get user blogs
   async getUserBlogs(authorId, queryParams = {}) {
-    return new MongooseQueryBuilder(Blog)
-    .search(queryParams.search, ['title', 'description'])
-    .where('author', authorId)
-    .where('title', queryParams.title)
-    .where('description', queryParams.description)
-    .paginate(queryParams.page, queryParams.limit)
-    .sort('createdAt')
-    .execute();
+    return Blog.search(queryParams.search, ['title', 'description'])
+      .where('author', authorId)
+      .where('title', queryParams.title)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 
   // Get paginated blogs with filtering
   async getAllBlogs(queryParams = {}) {
-    return new MongooseQueryBuilder(Blog)
-    .search(queryParams.search, ['title', 'description'])
-    .where('title', queryParams.title)
-    .where('description', queryParams.description)
-    .paginate(queryParams.page, queryParams.limit)
-    .sort('createdAt')
-    .execute();
+    return Blog.search(queryParams.search, ['title', 'description'])
+      .where('title', queryParams.title)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 
   // Get blog by ID

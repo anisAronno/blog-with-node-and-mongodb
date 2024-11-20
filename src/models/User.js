@@ -120,7 +120,7 @@ class User extends Model {
       throw new Error(`Change password failed: ${error.message}`);
     }
   }
-    async softDelete(id) {
+  async softDelete(id) {
     try {
       return await this.model.findByIdAndUpdate(
         id,
