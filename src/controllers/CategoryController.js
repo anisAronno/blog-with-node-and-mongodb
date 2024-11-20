@@ -14,8 +14,14 @@ class CategoryController {
   // Create new category
   async store(req, res) {
     try {
-        const { name } = req.body;
-        const category = await Category.create({ name });
+      const { name, description, parentCategory, subcategories } = req.body;
+      const category = await Category.create({
+        name,
+        description,
+        parentCategory,
+        subcategories,
+        author: req.user._id,
+      });
       res.status(201).json({ success: true, data: category });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
@@ -39,10 +45,11 @@ class CategoryController {
 
   // Update category
   async update(req, res) {
+    const { name, description, parentCategory, subcategories } = req.body;
     try {
       const category = await Category.updateById(
         req.params.id,
-        req.body,
+        { name, description, parentCategory, subcategories },
         {
           new: true,
           runValidators: true,

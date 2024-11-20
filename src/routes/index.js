@@ -77,14 +77,18 @@ router.get(
   AuthMiddleware.authenticate,
   TagController.show
 );
+
 router.put(
   TAG_ROUTES.UPDATE_BY_ID,
   AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin', 'editor', 'tag']),
   TagController.update
 );
+
 router.delete(
   TAG_ROUTES.DELETE_BY_ID,
   AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'tag']),
   TagController.destroy
 );
 
@@ -112,11 +116,13 @@ router.get(
 router.put(
   CATEGORY_ROUTES.UPDATE_BY_ID,
   AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['admin', 'superAdmin'], 'category'),
   CategoryController.update
 );
 router.delete(
   CATEGORY_ROUTES.DELETE_BY_ID,
   AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
   CategoryController.destroy
 );
 
@@ -169,7 +175,7 @@ router.get(
 router.put(
   USER_ROUTES.UPDATE_BY_ID,
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['admin']),
+  AuthMiddleware.authorize(['admin', 'editor']),
   UserController.updateUser
 );
 

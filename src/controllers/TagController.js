@@ -15,7 +15,7 @@ class TagController {
   async store(req, res) {
     try {
       const { name } = req.body;
-      const savedTag = await Tag.create({ name });
+      const savedTag = await Tag.create({ name, author: req.user._id });
       res.status(201).json({ success: true, data: savedTag });
     } catch (error) {
       console.log(error.stack);
@@ -42,10 +42,15 @@ class TagController {
   // Update tag
   async update(req, res) {
     try {
-      const tag = await Tag.updateById(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-      });
+      const { name } = req.body;
+      const tag = await Tag.updateById(
+        req.params.id,
+        { name },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
       if (!tag) {
         return res

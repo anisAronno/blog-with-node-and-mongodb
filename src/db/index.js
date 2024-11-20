@@ -6,9 +6,7 @@ const APP_CONFIG = require('../config');
 const connectToDatabase = async () => {
   try {
     const connection = mongoose.connect(APP_CONFIG.MONGO_DB_URI);
-    Logger.info(
-      `Successfully connected to MongoDB database: ${APP_CONFIG.MONGODB_NAME}`
-    );
+    Logger.info('Successfully connected to MongoDB');
     return connection;
   } catch (error) {
     Logger.error('Failed to connect to MongoDB:', error);

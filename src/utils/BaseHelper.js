@@ -1,5 +1,5 @@
 // src/utils/BaseHelper.js
-const AppseroError = require('../errors/AppseroError.js');
+const ProjectError = require('../errors/ProjectError.js');
 const crypto = require('crypto');
 const Logger = require('../utils/Logger');
 
@@ -8,11 +8,16 @@ class BaseHelper {
    * Stop process with custom error
    * @param {string} message Error message
    * @param {Object} [context] Additional context for logging
-   * @throws {AppseroError}
+   * @throws {ProjectError}
    */
   static stopProcess(message, context = {}) {
     Logger.error('Process Stopped', { message, ...context });
-    throw new AppseroError(message);
+    throw new ProjectError(message);
+  }
+
+  static capitalizeFirstLetter(str) {
+    if (str.length === 0) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
   /**

@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'author', 'editor', 'admin'],
+      enum: ['user', 'author', 'editor', 'admin', 'superAdmin'],
       default: 'user',
     },
     active: {
@@ -123,3 +123,14 @@ class User extends Model {
 }
 
 module.exports = new User();
+
+// super admin login
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2Q5YzVjMjFiMDZiMTlkOTBmNzJlMSIsImVtYWlsIjoiYW5pY2h1ckBhbmljaHVyLmNvbSIsInJvbGUiOiJzdXBlckFkbWluIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTczMjA5MDk3MiwiZXhwIjoxNzMyMzA2OTcyfQ.9kB9Qz1UbAQEMqAmWdyCmaVxGWCvHOsNgnZ7eqR8BOU
+
+// user login
+
+// user login
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2Q5Y2FlZDdiOWEwMTU2NzY0YTZhNiIsImVtYWlsIjoiYW5pY2h1cjJAYW5pY2h1ci5jb20iLCJyb2xlIjoidXNlciIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3MzIwOTEwNTQsImV4cCI6MTczMjMwNzA1NH0.neYhhWK7c_QPFGgw6ytieEO6ShK_hmQ3pJ5BMgFOmaE
+
+// admin login
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2Q5YzFkMjFiMDZiMTlkOTBmNzJkZiIsImVtYWlsIjoiYW5pc2Fyb25ub0BhbmljaHVyLmNvbSIsInJvbGUiOiJhZG1pbiIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3MzIwOTA5MDksImV4cCI6MTczMjMwNjkwOX0._pcbjC3GhmmAclKbn9QSyGbrYPNz_HH1-IZhj_Ffwco

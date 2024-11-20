@@ -18,6 +18,11 @@ const tagSchema = new mongoose.Schema(
       unique: true,
       minlength: 2,
     },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   {
     timestamps: true,

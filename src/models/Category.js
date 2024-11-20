@@ -25,6 +25,11 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       maxlength: 200,
     },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     parentCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
