@@ -1,6 +1,5 @@
 const Blog = require('../models/Blog');
-const Paginator = require('../utils/Paginator');
-
+const MongooseQueryBuilder = require('../utils/MongooseQueryBuilder');
 class BlogService {
   // Create a new blog
   async create(blogData, authorId) {
@@ -18,13 +17,26 @@ class BlogService {
   }
 
   // Get user blogs
-  async getUserBlogs(authorId, options = {}) {
-    return Paginator.createFromQuery(Blog, { author: authorId, ...options });
+  async getUserBlogs(authorId, queryParams = {}) {
+    return new MongooseQueryBuilder(Blog)
+    .search(queryParams.search, ['title', 'description'])
+    .where('author', authorId)
+    .where('title', queryParams.title)
+    .where('description', queryParams.description)
+    .paginate(queryParams.page, queryParams.limit)
+    .sort('createdAt')
+    .execute();
   }
 
   // Get paginated blogs with filtering
-  async getAllBlogs(options = {}) {
-    return Paginator.createFromQuery(Blog, options);
+  async getAllBlogs(queryParams = {}) {
+    return new MongooseQueryBuilder(Blog)
+    .search(queryParams.search, ['title', 'description'])
+    .where('title', queryParams.title)
+    .where('description', queryParams.description)
+    .paginate(queryParams.page, queryParams.limit)
+    .sort('createdAt')
+    .execute();
   }
 
   // Get blog by ID

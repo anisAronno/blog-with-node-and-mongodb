@@ -1,7 +1,6 @@
 const Category = require('../models/Category');
 const Blog = require('../models/Blog');
-const Paginator = require('../utils/Paginator');
-// const BaseHelper = require('../utils/BaseHelper');
+const MongooseQueryBuilder = require('../utils/MongooseQueryBuilder');
 
 class CategoryService {
   // Create a new category
@@ -15,7 +14,13 @@ class CategoryService {
 
   // Get all categories with pagination
   async getAllCategories(queryParams = {}) {
-    return Paginator.createFromQuery(Category, queryParams);
+    return new MongooseQueryBuilder(Category)
+      .search(queryParams.search, ['name', 'description'])
+      .where('name', queryParams.name)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 
   // Get category by ID
@@ -59,20 +64,27 @@ class CategoryService {
     }
   }
 
-  // Get blogs by category ID with pagination
-  async getBlogsByCategoryId(categoryId, options = {}) {
-    return await Paginator.createFromQuery(Blog, options, {
-      baseQuery: { categories: { $in: [categoryId] } },
-    });
+  async getBlogsByCategoryId(categoryId, queryParams = {}) {
+    return new MongooseQueryBuilder(Blog)
+      .search(queryParams.search, ['title', 'description'])
+      .where('tags', { $in: [categoryId] })
+      .where('title', queryParams.title)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 
   // Get all subcategories
-  async getSubcategories(parentCategoryId, options = {}) {
-    return Paginator.createFromQuery(
-      Category,
-      { parentCategory: parentCategoryId },
-      options
-    );
+  async getSubcategories(parentCategoryId, queryParams = {}) {
+    return new MongooseQueryBuilder(Category)
+    .search(queryParams.search, ['name', 'description'])
+    .where('parentCategory', parentCategoryId)
+    .where('name', queryParams.name)
+    .where('description', queryParams.description)
+    .paginate(queryParams.page, queryParams.limit)
+    .sort('createdAt')
+    .execute();
   }
 }
 

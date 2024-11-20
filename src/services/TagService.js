@@ -1,7 +1,6 @@
 const Tag = require('../models/Tag');
 const Blog = require('../models/Blog');
-const Paginator = require('../utils/Paginator');
-// const BaseHelper = require('../utils/BaseHelper');
+const MongooseQueryBuilder = require('../utils/MongooseQueryBuilder');
 
 class TagService {
   // Create a new tag
@@ -15,7 +14,12 @@ class TagService {
 
   // Get all tags with pagination
   async getAllTags(queryParams = {}) {
-    return Paginator.createFromQuery(Tag, queryParams);
+    return new MongooseQueryBuilder(Tag)
+      .search(queryParams.search, ['name'])
+      .where('name', queryParams.name)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 
   // Get tag by ID
@@ -64,10 +68,15 @@ class TagService {
   }
 
   // Get blogs by tag ID with pagination
-  async getBlogsByTagId(tagId, options = {}) {
-    return await Paginator.createFromQuery(Blog, options, {
-      baseQuery: { tags: { $in: [tagId] } },
-    });
+  async getBlogsByTagId(tagId, queryParams = {}) {
+    return new MongooseQueryBuilder(Blog)
+      .search(queryParams.search, ['title', 'description'])
+      .where('tags', { $in: [tagId] })
+      .where('title', queryParams.title)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
   }
 }
 
