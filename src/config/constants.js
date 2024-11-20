@@ -34,6 +34,7 @@ const TAG_ROUTES = {
   GET_BY_ID: '/tag/:id',
   UPDATE_BY_ID: '/tag/:id',
   DELETE_BY_ID: '/tag/:id',
+  GET_BLOGS_BY_TAG: '/tag/:id/blogs',
 };
 
 const CATEGORY_ROUTES = {
@@ -42,6 +43,7 @@ const CATEGORY_ROUTES = {
   GET_BY_ID: '/category/:id',
   UPDATE_BY_ID: '/category/:id',
   DELETE_BY_ID: '/category/:id',
+  GET_BLOGS_BY_CATEGORY: '/category/:id/blogs',
 };
 
 module.exports = {

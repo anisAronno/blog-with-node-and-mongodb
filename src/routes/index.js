@@ -92,6 +92,8 @@ router.delete(
   TagController.destroy
 );
 
+router.get(TAG_ROUTES.GET_BLOGS_BY_TAG, TagController.getBlogsByTag);
+
 /**
  * -------------------------------------
  * Category management
@@ -126,31 +128,9 @@ router.delete(
   CategoryController.destroy
 );
 
-/**
- * -------------------------------------
- * Authentication management
- * -------------------------------------
- */
-router.post('/login', AuthController.login);
-
-router.post('/register', AuthController.register);
-
-router.post('/logout', AuthMiddleware.authenticate, AuthController.logout);
-
-router.post('/refresh-token', AuthController.refreshToken);
-
-router.get('/me', AuthMiddleware.authenticate, AuthController.me);
-
-router.post(
-  '/change-password',
-  AuthMiddleware.authenticate,
-  AuthController.changePassword
-);
-
-router.post(
-  '/update-profile',
-  AuthMiddleware.authenticate,
-  AuthController.updateProfile
+router.get(
+  CATEGORY_ROUTES.GET_BLOGS_BY_CATEGORY,
+  CategoryController.getBlogsByCategory
 );
 
 /**
@@ -184,6 +164,33 @@ router.delete(
   AuthMiddleware.authenticate,
   AuthMiddleware.authorize(['admin']),
   UserController.deleteUser
+);
+
+/**
+ * -------------------------------------
+ * Authentication management
+ * -------------------------------------
+ */
+router.post('/login', AuthController.login);
+
+router.post('/register', AuthController.register);
+
+router.post('/logout', AuthMiddleware.authenticate, AuthController.logout);
+
+router.post('/refresh-token', AuthController.refreshToken);
+
+router.get('/me', AuthMiddleware.authenticate, AuthController.me);
+
+router.post(
+  '/change-password',
+  AuthMiddleware.authenticate,
+  AuthController.changePassword
+);
+
+router.post(
+  '/update-profile',
+  AuthMiddleware.authenticate,
+  AuthController.updateProfile
 );
 
 module.exports = router;

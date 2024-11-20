@@ -1,4 +1,5 @@
 const Blog = require('../models/Blog');
+const Paginator = require('../utils/Paginator');
 
 class BlogService {
   // Create a new blog
@@ -18,57 +19,12 @@ class BlogService {
 
   // Get user blogs
   async getUserBlogs(authorId, options = {}) {
-    return this.getBlogs({ author: authorId, ...options });
+    return Paginator.createFromQuery(Blog, { author: authorId, ...options });
   }
 
   // Get paginated blogs with filtering
   async getAllBlogs(options = {}) {
-    return this.getBlogs(options);
-  }
-
-  // Common method to get blogs
-  async getBlogs(options = {}) {
-    try {
-      const { page = 1, limit = 10, tags, published, search, author } = options;
-
-      const query = {};
-      if (author) {
-        query.author = author;
-      }
-      if (tags) {
-        query.tags = { $in: tags.split(',') };
-      }
-      if (published !== undefined) {
-        query.published = published === 'true';
-      }
-      if (search) {
-        query.$or = [
-          { title: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
-          { tags: { $in: [new RegExp(search, 'i')] } },
-        ];
-      }
-
-      const blogs = await Blog.find(query, {
-        skip: (page - 1) * limit,
-        limit: Number(limit),
-        sort: { createdAt: -1 },
-      });
-
-      const total = await Blog.model.countDocuments(query);
-
-      return {
-        blogs,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
-    } catch (error) {
-      throw new Error(`Failed to fetch blogs: ${error.message}`);
-    }
+    return Paginator.createFromQuery(Blog, options);
   }
 
   // Get blog by ID

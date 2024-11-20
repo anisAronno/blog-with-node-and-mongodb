@@ -8,7 +8,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.CREATED).json({
         success: true,
-        data: blog,
+        blog: blog,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -59,7 +59,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: blog,
+        blog: blog,
       });
     } catch (error) {
       res
@@ -86,7 +86,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: updatedBlog,
+        blog: updatedBlog,
       });
     } catch (error) {
       res
@@ -112,7 +112,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: publishedBlog,
+        blog: publishedBlog,
       });
     } catch (error) {
       res

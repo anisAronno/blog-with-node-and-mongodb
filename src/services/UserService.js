@@ -1,45 +1,10 @@
 const User = require('../models/User');
+const Paginator = require('../utils/Paginator');
 
 class UserService {
   // getAllUsers method
   async getAllUsers(options = {}) {
-    try {
-      const { username, email, role, search, page = 1, limit = 10 } = options;
-      const query = {};
-
-      if (username) query.username = new RegExp(username, 'i');
-      if (email) query.email = new RegExp(email, 'i');
-      if (role) query.role = role;
-
-      if (search) {
-        query.$or = [
-          { name: { $regex: search, $options: 'i' } },
-          { username: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { role: { $in: [new RegExp(search, 'i')] } },
-        ];
-      }
-
-      const users = await User.find(query, {
-        skip: (page - 1) * limit,
-        limit: Number(limit),
-        sort: { createdAt: -1 },
-      });
-
-      const total = await User.model.countDocuments(query);
-
-      return {
-        users,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
-    } catch (error) {
-      throw new Error(`Get users with filter failed: ${error.message}`);
-    }
+    return Paginator.createFromQuery(User, options);
   }
 
   // getUserById method

@@ -76,7 +76,8 @@ class AuthMiddleware {
         }
 
         if (data.author.equals(req.user._id)) {
-            return next();
+          req[`${modelName}`] = data;
+          return next();
         } else {
           return res.status(HTTP_STATUS_CODE.FORBIDDEN).json({
             success: false,

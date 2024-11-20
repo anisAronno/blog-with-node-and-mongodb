@@ -65,7 +65,7 @@ class UserController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: result,
+        refreshToken: result,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
@@ -81,7 +81,7 @@ class UserController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: result,
+        user: result,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
@@ -96,7 +96,7 @@ class UserController {
       const data = await AuthService.changePassword(req.user, req.body);
 
       res.status(HTTP_STATUS_CODE.OK).json({
-        data,
+        user: data,
         success: true,
         message: 'Password changed successfully',
       });
@@ -114,7 +114,7 @@ class UserController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: result,
+        user: result,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({

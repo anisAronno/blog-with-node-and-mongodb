@@ -3,6 +3,14 @@ class Model {
     this.model = model;
   }
 
+  getSchemaFields() {
+    return Object.entries(this.model.schema.paths)
+      .filter(
+        ([, schemaType]) => schemaType.constructor.name === 'SchemaString'
+      )
+      .map(([field]) => field);
+  }
+
   // Create a new document
   async create(data) {
     try {
