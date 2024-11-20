@@ -3,10 +3,13 @@ const BlogController = require('../controllers/BlogController.js');
 const UserController = require('../controllers/UserController.js');
 const AuthMiddleware = require('../middleware/AuthMiddleware.js');
 const AuthController = require('../controllers/AuthController.js');
+const CategoryController = require('../controllers/CategoryController.js');
+
 const {
   BLOG_ROUTES,
   USER_ROUTES,
   TAG_ROUTES,
+  CATEGORY_ROUTES,
 } = require('../config/constants.js');
 const TagController = require('../controllers/TagController.js');
 /**
@@ -83,6 +86,38 @@ router.delete(
   TAG_ROUTES.DELETE_BY_ID,
   AuthMiddleware.authenticate,
   TagController.destroy
+);
+
+/**
+ * -------------------------------------
+ * Category management
+ * -------------------------------------
+ */
+
+router.get(
+  CATEGORY_ROUTES.GET_ALL,
+  AuthMiddleware.authenticate,
+  CategoryController.index
+);
+router.post(
+  CATEGORY_ROUTES.CREATE,
+  AuthMiddleware.authenticate,
+  CategoryController.store
+);
+router.get(
+  CATEGORY_ROUTES.GET_BY_ID,
+  AuthMiddleware.authenticate,
+  CategoryController.show
+);
+router.put(
+  CATEGORY_ROUTES.UPDATE_BY_ID,
+  AuthMiddleware.authenticate,
+  CategoryController.update
+);
+router.delete(
+  CATEGORY_ROUTES.DELETE_BY_ID,
+  AuthMiddleware.authenticate,
+  CategoryController.destroy
 );
 
 /**

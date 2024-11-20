@@ -36,9 +36,18 @@ const TAG_ROUTES = {
   DELETE_BY_ID: '/tag/:id',
 };
 
+const CATEGORY_ROUTES = {
+  GET_ALL: '/categories',
+  CREATE: '/category',
+  GET_BY_ID: '/category/:id',
+  UPDATE_BY_ID: '/category/:id',
+  DELETE_BY_ID: '/category/:id',
+};
+
 module.exports = {
   HTTP_STATUS_CODE,
   BLOG_ROUTES,
   USER_ROUTES,
   TAG_ROUTES,
+  CATEGORY_ROUTES,
 };
