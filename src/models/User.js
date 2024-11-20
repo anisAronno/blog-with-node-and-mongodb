@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Model = require('./Model.js');
 const bcrypt = require('bcryptjs');
+const BaseModel = require('./BaseModel.js');
 
 // User Schema
 const userSchema = new mongoose.Schema(
@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
+userSchema.pre('validate', async function (next) {
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);
   }
@@ -68,11 +68,11 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Create model
+// Create Mongoose model
 const UserModel = mongoose.model('User', userSchema);
 
 // Extend the base Model with User-specific methods
-class User extends Model {
+class User extends BaseModel {
   constructor() {
     super(UserModel);
   }
@@ -86,7 +86,7 @@ class User extends Model {
     }
   }
 
-  // User-specific login method
+  // User login method
   async login(email, password) {
     try {
       const user = await this.findByEmail(email);
@@ -104,12 +104,15 @@ class User extends Model {
       throw new Error(`Login failed: ${error.message}`);
     }
   }
+
+  // Change password method
   async changePassword(id, oldPassword, newPassword) {
     try {
       const user = await this.findById(id);
       const isMatch = await user.comparePassword(oldPassword);
+
       if (!isMatch) {
-        throw new Error('Invalid credentials');
+        throw new Error('Invalid current password');
       }
 
       user.password = newPassword;
@@ -118,17 +121,6 @@ class User extends Model {
       return user;
     } catch (error) {
       throw new Error(`Change password failed: ${error.message}`);
-    }
-  }
-  async softDelete(id) {
-    try {
-      return await this.model.findByIdAndUpdate(
-        id,
-        { deleted_at: new Date() },
-        { new: true }
-      );
-    } catch (error) {
-      throw new Error(`Soft delete operation failed: ${error.message}`);
     }
   }
 }

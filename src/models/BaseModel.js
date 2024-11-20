@@ -1,18 +1,26 @@
 const pluralize = require('pluralize');
-class Model {
+
+class BaseModel {
   constructor(model) {
     this.model = model;
+    this.resetQuery();
+  }
+
+  // Query builder reset
+  resetQuery() {
     this.query = {
       conditions: {},
       options: {
         sort: { createdAt: -1 },
       },
     };
+    return this;
   }
 
+  // Generic query building methods
   where(field, value) {
-    if (!value || value.length === 0) return this;
-
+    if (!value || (typeof value === 'string' && value.length === 0))
+      return this;
     this.query.conditions[field] = value;
     return this;
   }
@@ -54,11 +62,13 @@ class Model {
     return this;
   }
 
+  // Execute query with pagination
   async execute() {
     const [data, total] = await Promise.all([
-      this.find(this.query.conditions, this.query.options),
+      this.model.find(this.query.conditions, null, this.query.options),
       this.model.countDocuments(this.query.conditions),
     ]);
+
     const modelName = this.model.modelName.toLowerCase();
     return {
       [pluralize(modelName)]: {
@@ -73,17 +83,7 @@ class Model {
     };
   }
 
-  //   ------------------------------------------
-
-  getSchemaFields() {
-    return Object.entries(this.model.schema.paths)
-      .filter(
-        ([, schemaType]) => schemaType.constructor.name === 'SchemaString'
-      )
-      .map(([field]) => field);
-  }
-
-  // Create a new document
+  // CRUD Operations
   async create(data) {
     try {
       return await this.model.create(data);
@@ -92,7 +92,6 @@ class Model {
     }
   }
 
-  // Find by ID
   async findById(id) {
     try {
       return await this.model.findById(id);
@@ -101,7 +100,6 @@ class Model {
     }
   }
 
-  // Find one document by query
   async findOne(query) {
     try {
       return await this.model.findOne(query);
@@ -110,7 +108,6 @@ class Model {
     }
   }
 
-  // Find multiple documents
   async find(query = {}, options = {}) {
     try {
       return await this.model.find(query, null, options);
@@ -119,7 +116,6 @@ class Model {
     }
   }
 
-  // Update document by ID
   async updateById(id, updateData) {
     try {
       return await this.model.findByIdAndUpdate(id, updateData, { new: true });
@@ -128,7 +124,6 @@ class Model {
     }
   }
 
-  // Delete document by ID
   async deleteById(id) {
     try {
       return await this.model.findByIdAndDelete(id);
@@ -137,7 +132,6 @@ class Model {
     }
   }
 
-  // Soft delete (if using a deleted_at field)
   async softDelete(id) {
     try {
       return await this.model.findByIdAndUpdate(
@@ -149,6 +143,15 @@ class Model {
       throw new Error(`Soft delete operation failed: ${error.message}`);
     }
   }
+
+  // Utility methods
+  getSchemaFields() {
+    return Object.entries(this.model.schema.paths)
+      .filter(
+        ([, schemaType]) => schemaType.constructor.name === 'SchemaString'
+      )
+      .map(([field]) => field);
+  }
 }
 
-module.exports = Model;
+module.exports = BaseModel;

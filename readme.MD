@@ -81,6 +81,7 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 - GET `/api/blogs`
 - GET `/api/blog/:id`
 - PUT `/api/blog/:id`
+- PATCH `/api/blog/:id/publish`
 - DELETE `/api/blog/:id`
 
 ### Users
@@ -89,6 +90,24 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 - GET `/api/user/:id`
 - PUT `/api/user/:id`
 - DELETE `/api/user/:id`
+
+### Categories
+
+- GET `/api/categories`
+- POST `/api/category`
+- GET `/api/category/:id`
+- PUT `/api/category/:id`
+- DELETE `/api/category/:id`
+- GET `/api/category/:id/blogs`
+
+### Tags
+
+- GET `/api/tags`
+- POST `/api/tag`
+- GET `/api/tag/:id`
+- PUT `/api/tag/:id`
+- DELETE `/api/tag/:id`
+- GET `/api/tag/:id/blogs`
 
 ## 📖 API Documentation
 

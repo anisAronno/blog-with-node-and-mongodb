@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Model = require('./Model.js');
+const BaseModel = require('./BaseModel.js');
 
 // Blog Schema
 const blogSchema = new mongoose.Schema(
@@ -51,7 +51,7 @@ const blogSchema = new mongoose.Schema(
 const BlogModel = mongoose.model('Blog', blogSchema);
 
 // Extend the base Model with Blog-specific methods
-class Blog extends Model {
+class Blog extends BaseModel {
   constructor() {
     super(BlogModel);
   }

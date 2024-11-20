@@ -1,22 +1,6 @@
 const BlogService = require('../services/BlogService');
 
 class BlogController {
-  // Create a new blog
-  async createBlog(req, res) {
-    try {
-      const blog = await BlogService.create(req.body, req.user._id);
-
-      res.status(HTTP_STATUS_CODE.CREATED).json({
-        success: true,
-        blog: blog,
-      });
-    } catch (error) {
-      res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  }
 
   //Get User Blogs
   async getUserBlogs(req, res) {
@@ -52,6 +36,23 @@ class BlogController {
     }
   }
 
+   // Create a new blog
+   async createBlog(req, res) {
+    try {
+      const blog = await BlogService.create(req.body, req.user._id);
+
+      res.status(HTTP_STATUS_CODE.CREATED).json({
+        success: true,
+        blog: blog,
+      });
+    } catch (error) {
+      res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+  
   // Get single blog
   async getBlogById(req, res) {
     try {

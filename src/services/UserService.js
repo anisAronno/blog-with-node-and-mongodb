@@ -3,9 +3,8 @@ const User = require('../models/User');
 class UserService {
   // getAllUsers method
   async getAllUsers(queryParams = {}) {
-    return User.search(queryParams.search, ['name', 'email'])
+    return await User.search(queryParams.search, ['name', 'email'])
       .where('name', queryParams.name)
-      .where('email', queryParams.email)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
       .execute();

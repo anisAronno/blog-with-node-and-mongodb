@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Model = require('./Model.js');
+const BaseModel = require('./BaseModel.js');
 const slugify = require('slugify');
 
 // Category Schema
@@ -58,7 +58,7 @@ categorySchema.pre('validate', function (next) {
 const CategoryModel = mongoose.model('Category', categorySchema);
 
 // Extend the base Model with Category-specific methods
-class Category extends Model {
+class Category extends BaseModel {
   constructor() {
     super(CategoryModel);
   }

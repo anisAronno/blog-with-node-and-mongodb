@@ -17,7 +17,8 @@ class BlogService {
 
   // Get user blogs
   async getUserBlogs(authorId, queryParams = {}) {
-    return Blog.search(queryParams.search, ['title', 'description'])
+    return Blog
+      .search(queryParams.search, ['title', 'description'])
       .where('author', authorId)
       .where('title', queryParams.title)
       .where('description', queryParams.description)
@@ -28,7 +29,8 @@ class BlogService {
 
   // Get paginated blogs with filtering
   async getAllBlogs(queryParams = {}) {
-    return Blog.search(queryParams.search, ['title', 'description'])
+    return Blog
+      .search(queryParams.search, ['title', 'description'])
       .where('title', queryParams.title)
       .where('description', queryParams.description)
       .paginate(queryParams.page, queryParams.limit)

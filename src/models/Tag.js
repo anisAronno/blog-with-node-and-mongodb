@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const Model = require('./Model.js');
+const BaseModel = require('./BaseModel.js');
 
 const tagSchema = new mongoose.Schema(
   {
@@ -40,8 +40,8 @@ tagSchema.pre('validate', function (next) {
 // Create model
 const TagModel = mongoose.model('Tag', tagSchema);
 
-// Extend the base Model with Category-specific methods
-class Tag extends Model {
+// Extend the base BaseModel with Category-specific methods
+class Tag extends BaseModel {
   constructor() {
     super(TagModel);
   }

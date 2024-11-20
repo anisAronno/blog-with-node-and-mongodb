@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Model = require('./Model');
+const BaseModel = require('./BaseModel');
 
 const tokenBlacklistSchema = new mongoose.Schema(
   {
@@ -25,7 +25,7 @@ const TokenBlacklistModel = mongoose.model(
   tokenBlacklistSchema
 );
 
-class TokenBlacklist extends Model {
+class TokenBlacklist extends BaseModel {
   constructor() {
     super(TokenBlacklistModel);
   }
