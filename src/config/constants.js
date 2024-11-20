@@ -28,8 +28,17 @@ const USER_ROUTES = {
   DELETE_BY_ID: '/user/:id',
 };
 
+const TAG_ROUTES = {
+  GET_ALL: '/tags',
+  CREATE: '/tag',
+  GET_BY_ID: '/tag/:id',
+  UPDATE_BY_ID: '/tag/:id',
+  DELETE_BY_ID: '/tag/:id',
+};
+
 module.exports = {
   HTTP_STATUS_CODE,
   BLOG_ROUTES,
   USER_ROUTES,
+  TAG_ROUTES,
 };

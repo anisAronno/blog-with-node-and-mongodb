@@ -3,7 +3,12 @@ const BlogController = require('../controllers/BlogController.js');
 const UserController = require('../controllers/UserController.js');
 const AuthMiddleware = require('../middleware/AuthMiddleware.js');
 const AuthController = require('../controllers/AuthController.js');
-const { BLOG_ROUTES, USER_ROUTES } = require('../config/constants.js');
+const {
+  BLOG_ROUTES,
+  USER_ROUTES,
+  TAG_ROUTES,
+} = require('../config/constants.js');
+const TagController = require('../controllers/TagController.js');
 /**
  * -------------------------------------
  * Blog management
@@ -46,6 +51,38 @@ router.delete(
   BLOG_ROUTES.DELETE_BY_ID,
   AuthMiddleware.authenticate,
   BlogController.deleteBlog
+);
+
+/**
+ * -------------------------------------
+ * Tag management
+ * -------------------------------------
+ */
+
+router.get(
+  TAG_ROUTES.GET_ALL,
+  AuthMiddleware.authenticate,
+  TagController.index
+);
+router.post(
+  TAG_ROUTES.CREATE,
+  AuthMiddleware.authenticate,
+  TagController.store
+);
+router.get(
+  TAG_ROUTES.GET_BY_ID,
+  AuthMiddleware.authenticate,
+  TagController.show
+);
+router.put(
+  TAG_ROUTES.UPDATE_BY_ID,
+  AuthMiddleware.authenticate,
+  TagController.update
+);
+router.delete(
+  TAG_ROUTES.DELETE_BY_ID,
+  AuthMiddleware.authenticate,
+  TagController.destroy
 );
 
 /**

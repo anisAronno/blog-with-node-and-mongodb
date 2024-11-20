@@ -51,9 +51,9 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
    npm install
    ```
 3. Create `.env` file (use `.env.example` as template)
-   `sh
-    cp .env.example .env
-    `
+   ```sh
+   cp .env.example .env
+   ```
 4. Start the application:
    ```sh
    npm run dev

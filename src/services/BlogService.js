@@ -7,6 +7,8 @@ class BlogService {
       const blog = await Blog.create({
         ...blogData,
         author: authorId,
+        tags: blogData.tags ?? [],
+        categories: blogData.categories ?? [],
       });
       return blog;
     } catch (error) {
