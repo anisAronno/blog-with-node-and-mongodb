@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const BaseModel = require('./BaseModel.js');
+const slugify = require('slugify');
 
 // Blog Schema
 const blogSchema = new mongoose.Schema(
@@ -15,6 +16,14 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 10,
+    },
+    slug: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      minlength: 2,
+      maxlength: 100,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
@@ -46,6 +55,13 @@ const blogSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+blogSchema.pre('validate', function (next) {
+  if (this.isNew || this.isModified('title')) {
+    this.slug = slugify(this.title, { lower: true, strict: true });
+  }
+  next();
+});
 
 // Create model
 const BlogModel = mongoose.model('Blog', blogSchema);

@@ -64,10 +64,23 @@ const CATEGORY_ROUTES = {
   GET_SUBCATEGORIES: '/category/:id/subcategories',
 };
 
+const SETTINGS_ROUTES = {
+  GET_ALL_SETTINGS: '/settings',
+  GET_PUBLIC_SETTINGS: '/settings-public',
+  GET_PRIVATE_SETTINGS: '/settings-private',
+  CREATE: '/settings',
+  GET_BY_KEY: '/settings/:key',
+  GET_PUBLIC_SETTINGS_BY_KEY: '/settings-public/:key',
+  GET_PRIVATE_SETTINGS_BY_KEY: '/settings-private/:key',
+  UPDATE_BY_KEY: '/settings/:key',
+  DELETE_BY_KEY: '/settings/:key',
+};
+
 module.exports = {
   HTTP_STATUS_CODE,
   BLOG_ROUTES,
   USER_ROUTES,
   TAG_ROUTES,
   CATEGORY_ROUTES,
+  SETTINGS_ROUTES,
 };

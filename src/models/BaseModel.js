@@ -28,8 +28,7 @@ class BaseModel {
 
   // Generic query building methods
   where(field, value) {
-    if (!value || (typeof value === 'string' && value.length === 0))
-      return this;
+    if (value === undefined || value === '' || value === null) return this;
     this.query.conditions[field] = value;
     return this;
   }
@@ -202,8 +201,7 @@ class BaseModel {
 
   async forceDelete(id) {
     try {
-
-        if (!this.hasSoftDelete) {
+      if (!this.hasSoftDelete) {
         throw new Error(
           'Force delete is only available for models with soft delete'
         );

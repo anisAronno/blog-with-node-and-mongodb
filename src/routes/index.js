@@ -4,11 +4,13 @@ const UserController = require('../controllers/UserController.js');
 const AuthMiddleware = require('../middleware/AuthMiddleware.js');
 const AuthController = require('../controllers/AuthController.js');
 const CategoryController = require('../controllers/CategoryController.js');
+const SettingsController = require('../controllers/SettingsController.js');
 const {
   BLOG_ROUTES,
   USER_ROUTES,
   TAG_ROUTES,
   CATEGORY_ROUTES,
+  SETTINGS_ROUTES,
 } = require('../config/constants.js');
 const TagController = require('../controllers/TagController.js');
 
@@ -244,21 +246,21 @@ router.delete(
 router.post(
   USER_ROUTES.RESTORE_BY_ID,
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'user']),
   UserController.restoreUser
 );
 
 router.delete(
   USER_ROUTES.FORCE_DELETE_BY_ID,
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin']),
+  AuthMiddleware.authorize(['superAdmin', 'user']),
   UserController.forceDeleteUser
 );
 
 router.get(
   USER_ROUTES.GET_TRASHED,
   AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'user']),
   UserController.getTrashedUsers
 );
 
@@ -287,6 +289,70 @@ router.post(
   '/update-profile',
   AuthMiddleware.authenticate,
   AuthController.updateProfile
+);
+
+/**
+ * -------------------------------------
+ * Setting management
+ * -------------------------------------
+ */
+
+router.get(
+  SETTINGS_ROUTES.GET_PUBLIC_SETTINGS,
+  SettingsController.getPublicOnly
+);
+
+router.get(
+  SETTINGS_ROUTES.GET_PUBLIC_SETTINGS_BY_KEY,
+  SettingsController.getPublicByKey
+);
+
+router.get(
+  SETTINGS_ROUTES.GET_ALL_SETTINGS,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'settings']),
+  SettingsController.getAll
+);
+router.get(
+  SETTINGS_ROUTES.GET_PRIVATE_SETTINGS,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'settings']),
+  SettingsController.getPrivateOnly
+);
+
+router.get(
+  SETTINGS_ROUTES.GET_BY_KEY,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'settings']),
+  SettingsController.getByKey
+);
+
+router.get(
+  SETTINGS_ROUTES.GET_PRIVATE_SETTINGS_BY_KEY,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'settings']),
+  SettingsController.getPrivateByKey
+);
+
+router.post(
+  SETTINGS_ROUTES.CREATE,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'settings']),
+  SettingsController.store
+);
+
+router.put(
+  SETTINGS_ROUTES.UPDATE_BY_KEY,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'admin', 'settings']),
+  SettingsController.updateByKey
+);
+
+router.delete(
+  SETTINGS_ROUTES.DELETE_BY_KEY,
+  AuthMiddleware.authenticate,
+  AuthMiddleware.authorize(['superAdmin', 'settings', 'settings']),
+  SettingsController.deleteByKey
 );
 
 module.exports = router;
