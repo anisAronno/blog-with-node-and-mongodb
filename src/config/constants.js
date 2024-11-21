@@ -76,6 +76,17 @@ const SETTINGS_ROUTES = {
   DELETE_BY_KEY: '/settings/:key',
 };
 
+const CONTACT_ROUTES = {
+  GET_ALL_CONTACTS: '/contacts',
+  CREATE_CONTACT: '/contact',
+  GET_BY_ID: '/contact/:id',
+  UPDATE_BY_ID: '/contact/:id',
+  DELETE_BY_ID: '/contact/:id',
+  RESTORE_BY_ID: '/contact/:id/restore',
+  FORCE_DELETE_BY_ID: '/contact/:id/force-delete',
+  GET_TRASHED: '/contacts-trashed',
+};
+
 module.exports = {
   HTTP_STATUS_CODE,
   BLOG_ROUTES,
@@ -83,4 +94,5 @@ module.exports = {
   TAG_ROUTES,
   CATEGORY_ROUTES,
   SETTINGS_ROUTES,
+  CONTACT_ROUTES,
 };

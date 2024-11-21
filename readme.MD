@@ -67,47 +67,86 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 
 ### Authentication
 
-- POST `/api/login`
-- POST `/api/register`
-- POST `/api/logout`
-- POST `/api/refresh-token`
-- GET `/api/me`
-- POST `/api/change-password`
-- POST `/api/update-profile`
+- POST /api/login
+- POST /api/register
+- POST /api/logout
+- POST /api/refresh-token
+- GET /api/me
+- POST /api/change-password
+- POST /api/update-profile
 
 ### Blogs
 
-- POST `/api/blog`
-- GET `/api/blogs`
-- GET `/api/blog/:id`
-- PUT `/api/blog/:id`
-- PATCH `/api/blog/:id/publish`
-- DELETE `/api/blog/:id`
+- POST /api/blog
+- GET /api/blogs
+- GET /api/blog/:id
+- PUT /api/blog/:id
+- DELETE /api/blog/:id
+- GET /api/blogs/slug/:slug
+- POST /api/blogs/:id/restore
+- GET /api/blogs-trashed
+- DELETE /api/blogs/:id/force-delete
+- GET /api/blogs/tag/:tag
+- GET /api/blogs/category/:id
 
 ### Users
 
-- GET `/api/users`
-- GET `/api/user/:id`
-- PUT `/api/user/:id`
-- DELETE `/api/user/:id`
+- GET /api/users
+- GET /api/user/:id
+- PUT /api/user/:id
+- DELETE /api/user/:id
+- POST /api/user/:id/restore
+- DELETE /api/user/:id/force-delete
+- GET /api/users-trashed
 
 ### Categories
 
-- GET `/api/categories`
-- POST `/api/category`
-- GET `/api/category/:id`
-- PUT `/api/category/:id`
-- DELETE `/api/category/:id`
-- GET `/api/category/:id/blogs`
+- GET /api/categories
+- POST /api/category
+- GET /api/category/:id
+- PUT /api/category/:id
+- DELETE /api/category/:id
+- POST /api/category/:id/restore
+- DELETE /api/category/:id/force-delete
+- GET /api/category/slug/:slug
+- GET /api/categories-trashed
+- GET /api/parent-categories
+- GET /api/category/:id/subcategories
 
 ### Tags
 
-- GET `/api/tags`
-- POST `/api/tag`
-- GET `/api/tag/:id`
-- PUT `/api/tag/:id`
-- DELETE `/api/tag/:id`
-- GET `/api/tag/:id/blogs`
+- GET /api/tags
+- POST /api/tag
+- GET /api/tag/:id
+- PUT /api/tag/:id
+- DELETE /api/tag/:id
+- POST /api/tag/:id/restore
+- DELETE /api/tag/:id/force-delete
+- GET /api/tag/slug/:slug
+- GET /api/tags-trashed
+
+## Settings
+
+- GET /api/settings
+- GET /api/settings-public
+- GET /api/settings-private
+- POST /api/settings
+- GET /api/settings/:key
+- GET /api/settings-public/:key
+- GET /api/settings-private/:key
+- PUT /api/settings/:key
+- DELETE /api/settings/:key
+
+### Contacts
+
+- GET /api/contacts
+- POST /api/contact
+- GET /api/contact/:id
+- PUT /api/contact/:id
+- DELETE /api/contact/:id
+- POST /api/contact/:id/restore
+- DELETE /api/contact/:id/force-delete
+- GET /api/contacts-trashed
 
 ## 📖 API Documentation
 

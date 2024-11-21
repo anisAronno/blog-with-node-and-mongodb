@@ -41,6 +41,10 @@ const categorySchema = new mongoose.Schema(
         ref: 'Category',
       },
     ],
+    deleted_at: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
