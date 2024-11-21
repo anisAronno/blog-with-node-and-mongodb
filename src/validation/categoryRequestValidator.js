@@ -3,7 +3,7 @@ const Category = require('../models/Category');
 
 // Check if category name is unique
 const isNameUnique = async (name, currentId = null) => {
-  const query = { name: name.toLowerCase() };
+  const query = { name: name };
   if (currentId) {
     query._id = { $ne: currentId };
   }

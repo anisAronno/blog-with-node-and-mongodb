@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const BaseModel = require('./BaseModel.js');
+const jwt = require('jsonwebtoken');
 
 // User Schema
 const userSchema = new mongoose.Schema(
@@ -41,6 +42,24 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'author', 'editor', 'admin', 'superAdmin'],
       default: 'user',
     },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+        type: {
+          type: String,
+          enum: ['access', 'refresh'],
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+          expires: '7d', // Token expires after 7 days
+        },
+      },
+    ],
     active: {
       type: Boolean,
       default: true,
@@ -67,6 +86,43 @@ userSchema.pre('validate', async function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
+
+userSchema.methods.generateTokens = function () {
+  const accessToken = generateAccessToken(this);
+  const refreshToken = generateRefreshToken(this);
+
+  // Store tokens in user's tokens array
+  this.tokens.push(
+    { token: accessToken, type: 'access' },
+    { token: refreshToken, type: 'refresh' }
+  );
+
+  return { accessToken, refreshToken };
+};
+
+// Helper functions for token generation
+function generateAccessToken(user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    },
+    APP_CONFIG.JWT_ACCESS_SECRET,
+    { expiresIn: '15m' }
+  );
+}
+
+function generateRefreshToken(user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      type: 'refresh',
+    },
+    APP_CONFIG.JWT_REFRESH_SECRET,
+    { expiresIn: '7d' }
+  );
+}
 
 // Create Mongoose model
 const UserModel = mongoose.model('User', userSchema);

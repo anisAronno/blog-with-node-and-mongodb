@@ -5,28 +5,27 @@ class BaseModel {
     this.model = model;
     this.resetQuery();
 
-    // Check if model has deleted_at field and set a flag
     this.hasSoftDelete = !!this.model.schema.paths.deleted_at;
+    this.defaultExcludedFields = ['password', 'tokens'];
 
-    // If model has soft delete, automatically filter out deleted records
     if (this.hasSoftDelete) {
       this.query.conditions.deleted_at = null;
     }
   }
 
-  // Query builder reset
   resetQuery() {
     this.query = {
       conditions: {},
       options: {
         sort: { createdAt: -1 },
+        select: '',
       },
-      includeTrashed: false, // Flag to track trashed state
+      includeTrashed: false,
+      page: 1,
     };
     return this;
   }
 
-  // Generic query building methods
   where(field, value) {
     if (value === undefined || value === '' || value === null) return this;
     this.query.conditions[field] = value;
@@ -70,20 +69,31 @@ class BaseModel {
     return this;
   }
 
-  // Method to include soft-deleted records
+  select(fields) {
+    // If no fields provided, exclude default sensitive fields
+    if (!fields || fields.length === 0) {
+      this.query.options.select = this.defaultExcludedFields
+        .map((field) => `-${field}`)
+        .join(' ');
+    } else {
+      // Ensure fields is an array
+      const selectFields = Array.isArray(fields) ? fields : [fields];
+
+      // Convert array to space-separated string for mongoose
+      this.query.options.select = selectFields.join(' ');
+    }
+    return this;
+  }
+
   withTrashed() {
-    // Only modify conditions if the model has deleted_at field
     if (this.hasSoftDelete) {
-      // Remove the deleted_at filter
       delete this.query.conditions.deleted_at;
       this.query.includeTrashed = true;
     }
     return this;
   }
 
-  // Method to only fetch soft-deleted records
   onlyTrashed() {
-    // Only modify conditions if the model has deleted_at field
     if (this.hasSoftDelete) {
       this.query.conditions.deleted_at = { $ne: null };
       this.query.includeTrashed = true;
@@ -91,15 +101,17 @@ class BaseModel {
     return this;
   }
 
-  // Execute query with pagination
   async execute() {
-    // Ensure soft delete filter is applied if needed
     if (this.hasSoftDelete && !this.query.includeTrashed) {
       this.query.conditions.deleted_at = null;
     }
 
     const [data, total] = await Promise.all([
-      this.model.find(this.query.conditions, null, this.query.options),
+      this.model.find(
+        this.query.conditions,
+        this.query.options.select,
+        this.query.options
+      ),
       this.model.countDocuments(this.query.conditions),
     ]);
 
@@ -117,7 +129,6 @@ class BaseModel {
     };
   }
 
-  // CRUD Operations
   async create(data) {
     try {
       return await this.model.create(data);
@@ -128,13 +139,12 @@ class BaseModel {
 
   async findById(id) {
     try {
-      // If soft delete is enabled, automatically apply filter
       const query =
         this.hasSoftDelete && !this.query.includeTrashed
           ? { _id: id, deleted_at: null }
           : { _id: id };
 
-      return await this.model.findOne(query);
+      return await this.model.findOne(query, this.query.options.select);
     } catch (error) {
       throw new Error(`Find by ID operation failed: ${error.message}`);
     }
@@ -142,12 +152,11 @@ class BaseModel {
 
   async findOne(query = {}) {
     try {
-      // If soft delete is enabled, automatically apply filter
       if (this.hasSoftDelete && !this.query.includeTrashed) {
         query.deleted_at = null;
       }
 
-      return await this.model.findOne(query);
+      return await this.model.findOne(query, this.query.options.select);
     } catch (error) {
       throw new Error(`Find one operation failed: ${error.message}`);
     }
@@ -155,12 +164,18 @@ class BaseModel {
 
   async find(query = {}, options = {}) {
     try {
-      // If soft delete is enabled, automatically apply filter
       if (this.hasSoftDelete && !this.query.includeTrashed) {
         query.deleted_at = null;
       }
 
-      return await this.model.find(query, null, options);
+      const mergedOptions = {
+        ...options,
+        select:
+          this.query.options.select ||
+          `-${this.defaultExcludedFields.join(' -')}`,
+      };
+
+      return await this.model.find(query, null, mergedOptions);
     } catch (error) {
       throw new Error(`Find operation failed: ${error.message}`);
     }
@@ -168,13 +183,13 @@ class BaseModel {
 
   async updateById(id, updateData) {
     try {
-      // If soft delete is enabled, automatically filter
       const query = this.hasSoftDelete
         ? { _id: id, deleted_at: null }
         : { _id: id };
 
       return await this.model.findOneAndUpdate(query, updateData, {
         new: true,
+        select: this.query.options.select,
       });
     } catch (error) {
       throw new Error(`Update operation failed: ${error.message}`);
@@ -183,16 +198,17 @@ class BaseModel {
 
   async deleteById(id) {
     try {
-      // If model has soft delete, set deleted_at timestamp
       if (this.hasSoftDelete) {
         return await this.model.findByIdAndUpdate(
           id,
           { deleted_at: new Date() },
-          { new: true }
+          {
+            new: true,
+            select: this.query.options.select,
+          }
         );
       }
 
-      // For models without soft delete, proceed with normal deletion
       return await this.model.findByIdAndDelete(id);
     } catch (error) {
       throw new Error(`Delete operation failed: ${error.message}`);
@@ -207,7 +223,6 @@ class BaseModel {
         );
       }
 
-      // Permanently delete the record, bypassing soft delete
       return await this.model.findByIdAndDelete(id);
     } catch (error) {
       throw new Error(`Force delete operation failed: ${error.message}`);
@@ -216,7 +231,6 @@ class BaseModel {
 
   async restoreById(id) {
     try {
-      // Only applicable for soft deletable models
       if (!this.hasSoftDelete) {
         throw new Error(
           'Restore is only available for models with soft delete'
@@ -226,14 +240,16 @@ class BaseModel {
       return await this.model.findByIdAndUpdate(
         id,
         { deleted_at: null },
-        { new: true }
+        {
+          new: true,
+          select: this.query.options.select,
+        }
       );
     } catch (error) {
       throw new Error(`Restore operation failed: ${error.message}`);
     }
   }
 
-  // Utility methods
   getSearchAbleStringFields() {
     return Object.entries(this.model.schema.paths)
       .filter(

@@ -7,6 +7,7 @@ class UserService {
       .where('name', queryParams.name)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
+      .select(['-password', '-tokens']) // Exclude password field
       .execute();
   }
 

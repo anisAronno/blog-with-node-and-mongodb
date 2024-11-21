@@ -67,7 +67,7 @@ router.post('/logout', AuthMiddleware.authenticate, AuthController.logout);
 
 router.post('/refresh-token', AuthController.refreshToken);
 
-router.get('/me', AuthMiddleware.authenticate, AuthController.me);
+router.get('/me', AuthMiddleware.authenticate, AuthController.getUserProfile);
 
 router.post(
   '/change-password',

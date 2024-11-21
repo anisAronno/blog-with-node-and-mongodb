@@ -1,46 +1,27 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const TokenBlacklist = require('../models/TokenBlacklist');
+const UserModel = require('../models/User');
 
 class AuthService {
-  // Generate JWT token
-  generateToken(user, type = 'access') {
-    const payload = {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-      type,
-    };
-
-    const options =
-      type === 'access'
-        ? { expiresIn: APP_CONFIG.JWT_ACCESS_EXPIRATION }
-        : { expiresIn: APP_CONFIG.JWT_REFRESH_EXPIRATION };
-
-    return jwt.sign(
-      payload,
-      type === 'access'
-        ? APP_CONFIG.JWT_ACCESS_SECRET
-        : APP_CONFIG.JWT_REFRESH_SECRET,
-      options
-    );
-  }
-
-  // Register method
+  // User Registration
   async register(requestData) {
     try {
-      const { username, email, password, name, role, active } = requestData;
-      const user = await User.create({
-        username,
-        email,
-        password,
-        name,
-        role,
-        active,
+      // Check if user already exists
+      const existingUser = await UserModel.findOne({
+        $or: [{ email: requestData.email }, { username: requestData.username }],
       });
 
-      const accessToken = this.generateToken(user, 'access');
-      const refreshToken = this.generateToken(user, 'refresh');
+      if (existingUser) {
+        throw new Error('User already exists');
+      }
+
+      // Create new user
+      const user = await UserModel.create(requestData);
+
+      // Generate tokens
+      const { accessToken, refreshToken } = user.generateTokens();
+
+      // Save user with new tokens
+      await user.save();
 
       return {
         user: {
@@ -60,14 +41,17 @@ class AuthService {
     }
   }
 
-  // Login method
+  // User Login
   async login(email, password) {
     try {
-      const user = await User.login(email, password);
+      // Authenticate user
+      const user = await UserModel.login(email, password);
 
-      // Generate access and refresh tokens
-      const accessToken = this.generateToken(user, 'access');
-      const refreshToken = this.generateToken(user, 'refresh');
+      // Generate new tokens
+      const { accessToken, refreshToken } = user.generateTokens();
+
+      // Save user with new tokens
+      await user.save();
 
       return {
         user: {
@@ -83,21 +67,57 @@ class AuthService {
         },
       };
     } catch (error) {
-      throw new Error(`Authentication failed: ${error.message}`);
+      throw new Error(`Login failed: ${error.message}`);
     }
   }
 
-  // Logout method
-  async logout(token) {
+  // Refresh Token
+  async refreshToken(refreshToken) {
     try {
-      // Decode the token to get expiration
-      const decoded = jwt.decode(token);
-      if (!decoded) {
-        throw new Error('Invalid token');
+      // Verify refresh token
+      const decoded = jwt.verify(refreshToken, APP_CONFIG.JWT_REFRESH_SECRET);
+
+      // Find user with this refresh token
+      const user = await UserModel.findOne({
+        _id: decoded.id,
+        'tokens.token': refreshToken,
+        'tokens.type': 'refresh',
+      });
+
+      if (!user) {
+        throw new Error('Invalid refresh token');
       }
 
-      // Blacklist the token
-      await TokenBlacklist.blacklistToken(token, new Date(decoded.exp * 1000));
+      // Remove old tokens
+      user.tokens = user.tokens.filter(
+        (token) => token.type !== 'access' && token.type !== 'refresh'
+      );
+
+      // Generate new tokens
+      const { accessToken, refreshToken: newRefreshToken } =
+        user.generateTokens();
+
+      // Save user with new tokens
+      await user.save();
+
+      return {
+        accessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch (error) {
+      throw new Error(`Token refresh failed: ${error.message}`);
+    }
+  }
+
+  // Logout
+  async logout(userId, token) {
+    try {
+      // Find user and remove specific token
+      await UserModel.findByIdAndUpdate(userId, {
+        $pull: {
+          tokens: { token: token },
+        },
+      });
 
       return true;
     } catch (error) {
@@ -105,79 +125,53 @@ class AuthService {
     }
   }
 
-  // Verify token with blacklist check
+  // Verify Token
   async verifyToken(token, type = 'access') {
     try {
-      // Check if token is blacklisted
-      const isBlacklisted = await TokenBlacklist.isTokenBlacklisted(token);
-      if (isBlacklisted) {
-        throw new Error('Token has been invalidated');
-      }
-
-      // Verify token based on type
+      // Choose appropriate secret based on token type
       const secret =
         type === 'access'
           ? APP_CONFIG.JWT_ACCESS_SECRET
           : APP_CONFIG.JWT_REFRESH_SECRET;
 
-      return jwt.verify(token, secret);
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
+      // Verify token
+      const decoded = jwt.verify(token, secret);
 
-  // Refresh token
-  async refreshToken(refreshToken) {
-    try {
-      // Verify refresh token
-      const decoded = await this.verifyToken(refreshToken, 'refresh');
+      // Find user with this token
+      const user = await UserModel.findOne({
+        _id: decoded.id,
+        'tokens.token': token,
+        'tokens.type': type,
+      });
 
-      // Find user
-      const user = await User.findById(decoded.id);
       if (!user) {
-        throw new Error('User not found');
+        throw new Error('Invalid token');
       }
 
-      // Generate new access token
-      const newAccessToken = this.generateToken(user, 'access');
-
-      return {
-        accessToken: newAccessToken,
-      };
+      return { user, decoded };
     } catch (error) {
-      throw new Error(`Token refresh failed: ${error.message}`);
+      throw new Error(`Token verification failed: ${error.message}`);
     }
   }
 
-  /**
-   *
-   * @param {User} user
-   * @param {Object} requestData
-   * @returns
-   */
-  async changePassword(user, requestData) {
+  // Change Password
+  async changePassword(userId, oldPassword, newPassword) {
     try {
-      const { oldPassword, newPassword } = requestData;
+      // Change password using model method
+      const user = await UserModel.changePassword(
+        userId,
+        oldPassword,
+        newPassword
+      );
 
-      if (!oldPassword || !newPassword) {
-        throw new Error('Old password and new password are required');
-      }
+      // Remove all existing tokens
+      user.tokens = [];
 
-      if (oldPassword === newPassword) {
-        throw new Error('New password cannot be the same as old password');
-      }
+      // Generate new tokens
+      const { accessToken, refreshToken } = user.generateTokens();
 
-      const isMatch = await user.comparePassword(oldPassword);
-
-      if (!isMatch) {
-        throw new Error('Old password is incorrect');
-      }
-
-      user.password = newPassword;
+      // Save user
       await user.save();
-
-      const accessToken = this.generateToken(user, 'access');
-      const refreshToken = this.generateToken(user, 'refresh');
 
       return {
         user: {
@@ -193,7 +187,28 @@ class AuthService {
         },
       };
     } catch (error) {
-      throw new Error(`Change password failed: ${error.message}`);
+      throw new Error(`Password change failed: ${error.message}`);
+    }
+  }
+
+  // Get User Profile
+  async getUserProfile(userId) {
+    try {
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      };
+    } catch (error) {
+      throw new Error(`Get profile failed: ${error.message}`);
     }
   }
 
@@ -201,7 +216,10 @@ class AuthService {
   async updateProfile(authUser, requestData) {
     try {
       const { email, name } = requestData;
-      const updatedUser = await User.updateById(authUser.id, { email, name });
+      const updatedUser = await UserModel.updateById(authUser.id, {
+        email,
+        name,
+      });
 
       return {
         user: {
@@ -214,26 +232,6 @@ class AuthService {
       };
     } catch (error) {
       throw new Error(`Update profile failed: ${error.message}`);
-    }
-  }
-
-  // me method
-  async me(requestData) {
-    try {
-      const { email } = requestData;
-      const user = await User.findByEmail(email);
-
-      return {
-        user: {
-          id: user._id,
-          username: user.username,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
-      };
-    } catch (error) {
-      throw new Error(`User not found: ${error.message}`);
     }
   }
 }
