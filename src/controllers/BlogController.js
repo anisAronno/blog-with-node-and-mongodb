@@ -1,4 +1,5 @@
 const BlogService = require('../services/BlogService');
+const BlogTransformer = require('../transformers/BlogTransformer');
 
 class BlogController {
   // Get all blogs
@@ -8,7 +9,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -25,7 +26,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -42,7 +43,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -59,7 +60,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -76,7 +77,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.CREATED).json({
         success: true,
-        blog: blog,
+        blog: BlogTransformer.transformBlog(blog),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -93,7 +94,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blog: blog,
+        blog: BlogTransformer.transformBlog(blog),
       });
     } catch (error) {
       res
@@ -116,7 +117,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blog: updatedBlog,
+        blog: BlogTransformer.transformBlog(updatedBlog),
       });
     } catch (error) {
       res
@@ -162,7 +163,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blog: blog,
+        blog: BlogTransformer.transformBlog(blog),
       });
     } catch (error) {
       res
@@ -208,7 +209,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -248,7 +249,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -268,7 +269,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        blogs: BlogTransformer.transformPaginatedBlogs(result),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
