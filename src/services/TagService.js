@@ -1,5 +1,4 @@
 const Tag = require('../models/Tag');
-const Blog = require('../models/Blog');
 
 class TagService {
   // Create a new tag
@@ -65,15 +64,45 @@ class TagService {
     }
   }
 
-  // Get blogs by tag ID with pagination
-  async getBlogsByTagId(tagId, queryParams = {}) {
-    return Blog.search(queryParams.search, ['title', 'description'])
-      .where('tags', { $in: [tagId] })
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
+  // Restore tag
+  async restoreTag(id) {
+    try {
+      return await Tag.restoreById(id);
+    } catch (error) {
+      throw new Error(`Tag restoration failed: ${error.message}`);
+    }
+  }
+
+  // Force delete tag
+  async forceDeleteTag(id) {
+    try {
+      return await Tag.forceDelete(id);
+    } catch (error) {
+      throw new Error(`Tag force deletion failed: ${error.message}`);
+    }
+  }
+
+  // Get all trashed tags
+  async getTrashedTags(queryParams = {}) {
+    return Tag.search(queryParams.search, ['name'])
+      .where('deleted_at', { $ne: null })
+      .where('name', queryParams.name)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
       .execute();
+  }
+
+  // Get Tag By Slug
+  async getTagBySlug(slug) {
+    try {
+      const tag = await Tag.findOne({ slug });
+      if (!tag) {
+        throw new Error('Tag not found');
+      }
+      return tag;
+    } catch (error) {
+      throw new Error(`Failed to fetch tag: ${error.message}`);
+    }
   }
 }
 

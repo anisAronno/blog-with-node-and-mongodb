@@ -64,6 +64,54 @@ class UserController {
       });
     }
   }
+
+  static async restoreUser(req, res) {
+    try {
+      await UserService.restoreUser(req.params.id);
+
+      res.status(HTTP_STATUS_CODE.OK).json({
+        success: true,
+        message: 'User restored successfully',
+      });
+    } catch (error) {
+      res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async forceDeleteUser(req, res) {
+    try {
+      await UserService.forceDeleteUser(req.params.id);
+
+      res.status(HTTP_STATUS_CODE.OK).json({
+        success: true,
+        message: 'User permanently deleted',
+      });
+    } catch (error) {
+      res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async getTrashedUsers(req, res) {
+    try {
+      const result = await UserService.getTrashedUsers(req.params);
+
+      res.status(HTTP_STATUS_CODE.OK).json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
 }
 
 module.exports = UserController;

@@ -95,16 +95,91 @@ class CategoryController {
     }
   }
 
-  // get blog by category id
-  async getBlogsByCategory(req, res) {
+  // Get all parent categories
+  async getParentCategories(req, res) {
     try {
-      const blogs = await CategoryService.getBlogsByCategoryId(
-        req.params.id,
+      const parentCategories = await CategoryService.getParentCategories(
         req.query
       );
-      res.json({ success: true, ...blogs });
+      res.json({ success: true, categories: parentCategories });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  // Restore category
+  async restoreCategory(req, res) {
+    try {
+      await CategoryService.restoreCategory(req.params.id, req.user);
+
+      res.status(HTTP_STATUS_CODE.OK).json({
+        success: true,
+        message: 'Category restored successfully',
+      });
+    } catch (error) {
+      res
+        .status(
+          error.message.includes('Not authorized')
+            ? HTTP_STATUS_CODE.FORBIDDEN
+            : HTTP_STATUS_CODE.BAD_REQUEST
+        )
+        .json({
+          success: false,
+          message: error.message,
+        });
+    }
+  }
+
+  // Force delete category
+  async forceDeleteCategory(req, res) {
+    try {
+      await CategoryService.forceDeleteCategory(req.params.id, req.user);
+
+      res.status(HTTP_STATUS_CODE.OK).json({
+        success: true,
+        message: 'Category permanently deleted',
+      });
+    } catch (error) {
+      res
+        .status(
+          error.message.includes('Not authorized')
+            ? HTTP_STATUS_CODE.FORBIDDEN
+            : HTTP_STATUS_CODE.BAD_REQUEST
+        )
+        .json({
+          success: false,
+          message: error.message,
+        });
+    }
+  }
+
+  // Get trashed categories
+  async getTrashedCategories(req, res) {
+    try {
+      const result = await CategoryService.getTrashedCategories(req.query);
+
+      res.status(HTTP_STATUS_CODE.OK).json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  // Get category by slug
+  async getCategoryBySlug(req, res) {
+    try {
+      const category = await CategoryService.getCategoryBySlug(req.params.slug);
+      if (!category) {
+        throw new Error('Category not found');
+      }
+      res.json({ success: true, category: category });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 }

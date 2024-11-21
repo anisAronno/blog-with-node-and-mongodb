@@ -71,11 +71,60 @@ class TagController {
     }
   }
 
-  // Get all blogs with tag
-  async getBlogsByTag(req, res) {
+  // Restore tag
+  async restoreTag(req, res) {
     try {
-      const blogs = await TagService.getBlogsByTagId(req.params.id, req.query);
-      res.json({ success: true, ...blogs });
+      const tag = await TagService.restoreTag(req.params.id);
+
+      if (!tag) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Tag not found' });
+      }
+
+      res.json({ success: true, tag: tag });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  // Force delete tag
+  async forceDeleteTag(req, res) {
+    try {
+      const tag = await TagService.forceDeleteTag(req.params.id);
+
+      if (!tag) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Tag not found' });
+      }
+
+      res.json({ success: true, data: {} });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  // Get Trash tags
+  async getTrashedTags(req, res) {
+    try {
+      const tags = await TagService.getTrashedTags(req.query);
+      res.json({ success: true, ...tags });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  // Get Tag by Slug
+  async getTagBySlug(req, res) {
+    try {
+      const tag = await TagService.getTagBySlug(req.params.slug);
+      if (!tag) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Tag not found' });
+      }
+      res.json({ success: true, tag: tag });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
