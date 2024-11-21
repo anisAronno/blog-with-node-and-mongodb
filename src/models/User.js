@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const BaseModel = require('./BaseModel.js');
 const jwt = require('jsonwebtoken');
+const APP_CONFIG = require('../config/index.js');
 
 // User Schema
 const userSchema = new mongoose.Schema(
@@ -52,6 +53,10 @@ const userSchema = new mongoose.Schema(
           type: String,
           enum: ['access', 'refresh'],
           required: true,
+        },
+        active: {
+          type: Boolean,
+          default: true,
         },
         createdAt: {
           type: Date,
@@ -109,7 +114,7 @@ function generateAccessToken(user) {
       role: user.role,
     },
     APP_CONFIG.JWT_ACCESS_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: APP_CONFIG.JWT_ACCESS_EXPIRATION }
   );
 }
 
@@ -120,7 +125,7 @@ function generateRefreshToken(user) {
       type: 'refresh',
     },
     APP_CONFIG.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: APP_CONFIG.JWT_REFRESH_EXPIRATION }
   );
 }
 
