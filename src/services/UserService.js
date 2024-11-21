@@ -7,7 +7,18 @@ class UserService {
       .where('name', queryParams.name)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
-      .select(['-password', '-tokens']) // Exclude password field
+      .select(['-password', '-tokens'])
+      .execute();
+  }
+
+  //getTrashedUsers
+  async getTrashedUsers(queryParams = {}) {
+    return await User.onlyTrashed()
+      .search(queryParams.search, ['name', 'email'])
+      .where('name', queryParams.name)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .select(['-password', '-tokens'])
       .execute();
   }
 
@@ -29,7 +40,7 @@ class UserService {
         },
       };
     } catch (error) {
-      throw new Error(`Get user by id failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -56,7 +67,7 @@ class UserService {
         },
       };
     } catch (error) {
-      throw new Error(`Update user failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -68,7 +79,19 @@ class UserService {
         throw new Error('User not found');
       }
     } catch (error) {
-      throw new Error(`Delete user failed: ${error.message}`);
+      throw new Error(error.message);
+    }
+  }
+
+  //forceDeleteUser
+  async forceDeleteUser(id) {
+    try {
+      const user = await User.forceDelete(id);
+      if (!user) {
+        throw new Error('User not found');
+      }
+    } catch (error) {
+      throw new Error(error.message);
     }
   }
 }

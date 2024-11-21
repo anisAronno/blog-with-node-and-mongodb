@@ -339,16 +339,6 @@ router.get(
   CategoryController.getTrashedCategories
 );
 
-router.get(
-  CATEGORY_ROUTES.GET_PARENT_CATEGORIES,
-  CategoryController.getParentCategories
-);
-
-router.get(
-  CATEGORY_ROUTES.GET_SUBCATEGORIES,
-  CategoryController.getSubcategories
-);
-
 /**
  * -------------------------------------
  * Setting management

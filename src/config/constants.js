@@ -3,7 +3,7 @@ const HTTP_STATUS_CODE = {
   OK: 200,
   BAD_REQUEST: 400,
   NOT_FOUND: 404,
-  INTERNAL_SERVER_ERROR: 500,
+  INTERNAL_SERVER_ERROR: 400,
   METHOD_NOT_ALLOWED: 405,
   UNPROCESSABLE_ENTITY: 422,
   CREATED: 201,
@@ -60,8 +60,6 @@ const CATEGORY_ROUTES = {
   FORCE_DELETE_BY_ID: '/category/:id/force-delete',
   GET_BY_SLUG: '/category/slug/:slug',
   GET_TRASHED: '/categories-trashed',
-  GET_PARENT_CATEGORIES: '/parent-categories',
-  GET_SUBCATEGORIES: '/category/:id/subcategories',
 };
 
 const SETTINGS_ROUTES = {

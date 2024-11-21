@@ -4,18 +4,18 @@ class ContactController {
   async index(req, res) {
     try {
       const contacts = await ContactService.getAllContacts(req.query);
-      res.status(200).json(contacts);
+      res.status(200).json({ contacts });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
   async store(req, res) {
     try {
       const contact = await ContactService.createContact(req.body);
-      res.status(201).json(contact);
+      res.status(201).json({ contact });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -25,9 +25,9 @@ class ContactController {
       if (!contact) {
         return res.status(404).json({ message: 'Contact not found' });
       }
-      res.status(200).json(contact);
+      res.status(200).json({ contact });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -40,9 +40,9 @@ class ContactController {
       if (!contact) {
         return res.status(404).json({ message: 'Contact not found' });
       }
-      res.status(200).json(contact);
+      res.status(200).json({ contact });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -54,7 +54,7 @@ class ContactController {
       }
       res.status(200).json({ message: 'Contact deleted successfully' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -64,9 +64,9 @@ class ContactController {
       if (!contact) {
         return res.status(404).json({ message: 'Contact not found' });
       }
-      res.status(200).json(contact);
+      res.status(200).json({ contact });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -78,16 +78,16 @@ class ContactController {
       }
       res.status(200).json({ message: 'Contact permanently deleted' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 
   async trashed(req, res) {
     try {
       const contacts = await ContactService.getTrashedContacts(req.query);
-      res.status(200).json(contacts);
+      res.status(200).json({ contacts });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   }
 }

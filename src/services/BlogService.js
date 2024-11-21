@@ -12,19 +12,17 @@ class BlogService {
       .paginate(page, limit)
       .sort('createdAt');
 
-    const result = await query.execute();
+    const response = await query.execute();
 
-    result.blogs.blogs = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       { path: 'author', select: 'email name username' },
     ]);
-
-    return result;
   }
   // Get published blogs
   async getPublishedBlogs(queryParams = {}) {
-    const result = await Blog.search(queryParams.search, [
+    const response = await Blog.search(queryParams.search, [
       'title',
       'description',
     ])
@@ -35,7 +33,7 @@ class BlogService {
       .sort('createdAt')
       .execute();
 
-    result.blogs.data = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       {
@@ -43,13 +41,11 @@ class BlogService {
         select: 'email name username',
       },
     ]);
-
-    return result;
   }
 
   // Get user blogs
   async getUserBlogs(authorId, queryParams = {}) {
-    const result = await Blog.search(queryParams.search, [
+    const response = await Blog.search(queryParams.search, [
       'title',
       'description',
     ])
@@ -60,7 +56,7 @@ class BlogService {
       .sort('createdAt')
       .execute();
 
-    result.blogs.data = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       {
@@ -68,13 +64,11 @@ class BlogService {
         select: 'email name username',
       },
     ]);
-
-    return result;
   }
 
   // Get user published blogs
   async getUserPublishedBlogs(authorId, queryParams = {}) {
-    const result = await Blog.search(queryParams.search, [
+    const response = await Blog.search(queryParams.search, [
       'title',
       'description',
     ])
@@ -86,7 +80,7 @@ class BlogService {
       .sort('createdAt')
       .execute();
 
-    result.blogs.data = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       {
@@ -94,24 +88,19 @@ class BlogService {
         select: 'email name username',
       },
     ]);
-
-    return result;
   }
 
   // Get trashed blogs
   async getTrashedBlogs(queryParams = {}) {
-    const result = await Blog.search(queryParams.search, [
-      'title',
-      'description',
-    ])
-      .where('deleted_at', { $ne: null })
+    const response = await Blog.onlyTrashed()
+      .search(queryParams.search, ['title', 'description'])
       .where('title', queryParams.title)
       .where('description', queryParams.description)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
       .execute();
 
-    result.blogs.data = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       {
@@ -119,13 +108,11 @@ class BlogService {
         select: 'email name username',
       },
     ]);
-
-    return result;
   }
 
   // Get blogs by tag
   async getBlogsByTag(tagId, queryParams = {}) {
-    const result = await Blog.search(queryParams.search, [
+    const response = await Blog.search(queryParams.search, [
       'title',
       'description',
     ])
@@ -136,7 +123,7 @@ class BlogService {
       .sort('createdAt')
       .execute();
 
-    result.blogs.data = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       {
@@ -144,13 +131,11 @@ class BlogService {
         select: 'email name username',
       },
     ]);
-
-    return result;
   }
 
   // Get blogs by category
   async getBlogsByCategory(categoryId, queryParams = {}) {
-    const result = await Blog.search(queryParams.search, [
+    const response = await Blog.search(queryParams.search, [
       'title',
       'description',
     ])
@@ -161,7 +146,7 @@ class BlogService {
       .sort('createdAt')
       .execute();
 
-    result.blogs.data = await Blog.model.populate(result.blogs.data, [
+    return await Blog.model.populate(response, [
       { path: 'tags', select: 'name description' },
       { path: 'categories', select: 'name description' },
       {
@@ -169,8 +154,6 @@ class BlogService {
         select: 'email name username',
       },
     ]);
-
-    return result;
   }
 
   // Create a new blog
@@ -189,7 +172,7 @@ class BlogService {
         { path: 'author', select: 'email name username' },
       ]);
     } catch (error) {
-      throw new Error(`Blog creation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -210,7 +193,7 @@ class BlogService {
         },
       ]);
     } catch (error) {
-      throw new Error(`Failed to fetch blog: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -224,7 +207,7 @@ class BlogService {
         { path: 'author', select: 'email name username' },
       ]);
     } catch (error) {
-      throw new Error(`Blog update failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -234,7 +217,7 @@ class BlogService {
       await Blog.deleteById(id);
       return true;
     } catch (error) {
-      throw new Error(`Blog deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -255,7 +238,7 @@ class BlogService {
         },
       ]);
     } catch (error) {
-      throw new Error(`Failed to fetch blog: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -269,7 +252,7 @@ class BlogService {
         { path: 'author', select: 'email name username' },
       ]);
     } catch (error) {
-      throw new Error(`Blog restoration failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -278,7 +261,7 @@ class BlogService {
     try {
       return await Blog.forceDelete(id);
     } catch (error) {
-      throw new Error(`Blog force deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

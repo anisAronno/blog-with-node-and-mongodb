@@ -110,8 +110,6 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 - DELETE /api/category/:id/force-delete
 - GET /api/category/slug/:slug
 - GET /api/categories-trashed
-- GET /api/parent-categories
-- GET /api/category/:id/subcategories
 
 ### Tags
 

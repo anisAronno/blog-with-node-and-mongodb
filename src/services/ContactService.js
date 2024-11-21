@@ -6,7 +6,7 @@ class ContactService {
     try {
       return await Contact.create(data);
     } catch (error) {
-      throw new Error(`Contact creation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -38,7 +38,7 @@ class ContactService {
       }
       return contact;
     } catch (error) {
-      throw new Error(`Failed to fetch contact: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -55,7 +55,7 @@ class ContactService {
 
       return contact;
     } catch (error) {
-      throw new Error(`Contact update failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -64,7 +64,7 @@ class ContactService {
     try {
       return await Contact.deleteById(id);
     } catch (error) {
-      throw new Error(`Contact deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -73,7 +73,7 @@ class ContactService {
     try {
       return await Contact.restoreById(id);
     } catch (error) {
-      throw new Error(`Contact restoration failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -82,20 +82,20 @@ class ContactService {
     try {
       return await Contact.forceDelete(id);
     } catch (error) {
-      throw new Error(`Contact force deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   // Get all trashed contacts
   async getTrashedContacts(queryParams = {}) {
-    return Contact.search(queryParams.search, [
-      'name',
-      'email',
-      'phone',
-      'message',
-      'subject',
-    ])
-      .where('deleted_at', { $ne: null })
+    return Contact.onlyTrashed()
+      .search(queryParams.search, [
+        'name',
+        'email',
+        'phone',
+        'message',
+        'subject',
+      ])
       .where('name', queryParams.name)
       .where('email', queryParams.email)
       .where('phone', queryParams.phone)

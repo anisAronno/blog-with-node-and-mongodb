@@ -1,31 +1,72 @@
 const Category = require('../models/Category');
 
 class CategoryService {
-  // Create a new category
-  async create(categoryData) {
-    try {
-      return await Category.create(categoryData);
-    } catch (error) {
-      throw new Error(`Category creation failed: ${error.message}`);
-    }
-  }
-
   // Get all categories with pagination
   async getAllCategories(queryParams = {}) {
-    return Category.search(queryParams.search, ['name', 'description'])
+    const response = await Category.search(queryParams.search, [
+      'name',
+      'description',
+    ])
       .where('name', queryParams.name)
       .where('description', queryParams.description)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
       .execute();
+
+    return await Category.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
+  }
+
+  // Get trashed categories
+  async getTrashedCategories(queryParams = {}) {
+    const response = await Category.onlyTrashed()
+      .search(queryParams.search, ['name', 'description'])
+      .where('name', queryParams.name)
+      .where('description', queryParams.description)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
+
+    return await Category.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
+  }
+
+  // Create a new category
+  async create(categoryData) {
+    try {
+      const response = await Category.create(categoryData);
+
+      return await Category.model.populate(response, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   // Get category by ID
   async getCategoryById(id) {
     try {
-      return await Category.findById(id);
+      const response = await Category.findById(id);
+      return await Category.model.populate(response, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Failed to fetch category: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -40,58 +81,39 @@ class CategoryService {
       Object.assign(category, updateData);
       await category.save();
 
-      return category;
+      return await Category.model.populate(category, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Category update failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   // Delete category
   async deleteCategory(id) {
     try {
-      const category = await this.getCategoryById(id);
-      if (!category) {
-        throw new Error('Category not found');
-      }
-
-      await Category.deleteOne({ _id: id });
+      await Category.deleteById(id);
       return true;
     } catch (error) {
-      throw new Error(`Category deletion failed: ${error.message}`);
-    }
-  }
-
-  // Get all subcategories
-  async getSubcategories(parentCategoryId, queryParams = {}) {
-    return Category.search(queryParams.search, ['name', 'description'])
-      .where('parentCategory', parentCategoryId)
-      .where('name', queryParams.name)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
-  }
-
-  // Get parent category
-  async getParentCategories(id) {
-    try {
-      const category = await this.getCategoryById(id);
-      if (!category) {
-        throw new Error('Category not found');
-      }
-
-      return await Category.find({ _id: category.parentCategory });
-    } catch (error) {
-      throw new Error(`Failed to fetch parent category: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   // restore category
   async restoreCategory(id) {
     try {
-      return await Category.restoreById(id);
+      const response = await Category.restoreById(id);
+      return await Category.model.populate(response, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Category restoration failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -100,27 +122,22 @@ class CategoryService {
     try {
       return await Category.forceDelete(id);
     } catch (error) {
-      throw new Error(`Category force deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
-  }
-
-  // Get trashed categories
-  async getTrashedCategories(queryParams = {}) {
-    return Category.search(queryParams.search, ['name', 'description'])
-      .where('deleted_at', { $ne: null })
-      .where('name', queryParams.name)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
   }
 
   // Get Category By Slug
   async getCategoryBySlug(slug) {
     try {
-      return await Category.findOne({ slug });
+      const response = await Category.findOne({ slug });
+      return await Category.model.populate(response, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Failed to fetch category: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

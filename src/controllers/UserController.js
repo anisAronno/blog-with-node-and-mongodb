@@ -3,11 +3,11 @@ const UserService = require('../services/UserService');
 class UserController {
   static async getAllUsers(req, res) {
     try {
-      const result = await UserService.getAllUsers(req.params);
+      const users = await UserService.getAllUsers(req.params);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        users,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
@@ -19,11 +19,11 @@ class UserController {
 
   static async getUserById(req, res) {
     try {
-      const result = await UserService.getUserById(req.params.id);
+      const user = await UserService.getUserById(req.params.id);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        user: result,
+        ...user,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
@@ -35,11 +35,11 @@ class UserController {
 
   static async updateUser(req, res) {
     try {
-      const result = await UserService.updateUser(req.params.id, req.body);
+      const user = await UserService.updateUser(req.params.id, req.body);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        user: result,
+        ...user,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
@@ -67,10 +67,11 @@ class UserController {
 
   static async restoreUser(req, res) {
     try {
-      await UserService.restoreUser(req.params.id);
+      const user = await UserService.restoreUser(req.params.id);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
+        ...user,
         message: 'User restored successfully',
       });
     } catch (error) {
@@ -99,11 +100,11 @@ class UserController {
 
   static async getTrashedUsers(req, res) {
     try {
-      const result = await UserService.getTrashedUsers(req.params);
+      const users = await UserService.getTrashedUsers(req.params);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        users,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({

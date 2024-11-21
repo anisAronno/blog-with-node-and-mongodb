@@ -1,5 +1,3 @@
-const pluralize = require('pluralize');
-
 class BaseModel {
   constructor(model) {
     this.model = model;
@@ -115,16 +113,13 @@ class BaseModel {
       this.model.countDocuments(this.query.conditions),
     ]);
 
-    const modelName = this.model.modelName.toLowerCase();
     return {
-      [pluralize(modelName)]: {
-        data,
-        total,
-        pagination: {
-          page: this.query.page,
-          limit: this.query.options.limit,
-          totalPages: Math.ceil(total / this.query.options.limit),
-        },
+      data,
+      total,
+      pagination: {
+        page: this.query.page,
+        limit: this.query.options.limit,
+        totalPages: Math.ceil(total / this.query.options.limit),
       },
     };
   }
@@ -199,6 +194,13 @@ class BaseModel {
   async deleteById(id) {
     try {
       if (this.hasSoftDelete) {
+        const document = await this.model.findOne({
+          _id: id,
+          deleted_at: null,
+        });
+        if (!document) {
+          throw new Error('Not found');
+        }
         return await this.model.findByIdAndUpdate(
           id,
           { deleted_at: new Date() },
@@ -222,6 +224,14 @@ class BaseModel {
           'Force delete is only available for models with soft delete'
         );
       }
+      const document = await this.model.findOne({
+        _id: id,
+        deleted_at: { $ne: null },
+      });
+
+      if (!document) {
+        throw new Error('Not found');
+      }
 
       return await this.model.findByIdAndDelete(id);
     } catch (error) {
@@ -235,6 +245,15 @@ class BaseModel {
         throw new Error(
           'Restore is only available for models with soft delete'
         );
+      }
+
+      const document = await this.model.findOne({
+        _id: id,
+        deleted_at: { $ne: null },
+      });
+
+      if (!document) {
+        throw new Error('Not found');
       }
 
       return await this.model.findByIdAndUpdate(

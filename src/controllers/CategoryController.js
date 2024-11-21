@@ -5,21 +5,19 @@ class CategoryController {
   async index(req, res) {
     try {
       const categories = await CategoryService.getAllCategories(req.query);
-      res.json({ success: true, ...categories });
+      res.json({ success: true, categories });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
   // Create new category
   async store(req, res) {
     try {
-      const { name, description, parentCategory, subcategories } = req.body;
+      const { name, description } = req.body;
       const category = await CategoryService.create({
         name,
         description,
-        parentCategory,
-        subcategories,
         author: req.user._id,
       });
       res.status(201).json({ success: true, category: category });
@@ -39,17 +37,17 @@ class CategoryController {
       }
       res.json({ success: true, category: category });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
   // Update category
   async update(req, res) {
-    const { name, description, parentCategory, subcategories } = req.body;
+    const { name, description } = req.body;
     try {
       const category = await CategoryService.updateCategory(
         req.params.id,
-        { name, description, parentCategory, subcategories },
+        { name, description },
         {
           new: true,
           runValidators: true,
@@ -70,51 +68,26 @@ class CategoryController {
   // Delete category
   async destroy(req, res) {
     try {
-      const category = await CategoryService.deleteCategory(req.params.id);
-      if (!category) {
+      const response = await CategoryService.deleteCategory(req.params.id);
+      if (!response) {
         return res
           .status(404)
           .json({ success: false, message: 'Category not found' });
       }
-      res.json({ success: true, category: {} });
+      res.json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
-
-  // Get all subcategories
-  async getSubcategories(req, res) {
-    try {
-      const subcategories = await CategoryService.getSubcategories(
-        req.params.id,
-        req.query
-      );
-      res.json({ success: true, categories: subcategories });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
-
-  // Get all parent categories
-  async getParentCategories(req, res) {
-    try {
-      const parentCategories = await CategoryService.getParentCategories(
-        req.query
-      );
-      res.json({ success: true, categories: parentCategories });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
   // Restore category
   async restoreCategory(req, res) {
     try {
-      await CategoryService.restoreCategory(req.params.id, req.user);
+      const category = await CategoryService.restoreCategory(req.params.id);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        message: 'Category restored successfully',
+        category,
       });
     } catch (error) {
       res
@@ -156,11 +129,11 @@ class CategoryController {
   // Get trashed categories
   async getTrashedCategories(req, res) {
     try {
-      const result = await CategoryService.getTrashedCategories(req.query);
+      const categories = await CategoryService.getTrashedCategories(req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        ...result,
+        categories,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({

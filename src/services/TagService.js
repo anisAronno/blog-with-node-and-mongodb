@@ -1,24 +1,53 @@
 const Tag = require('../models/Tag');
 
 class TagService {
-  // Create a new tag
-  async create(tagData) {
-    try {
-      return await Tag.create(tagData);
-    } catch (error) {
-      throw new Error(`Tag creation failed: ${error.message}`);
-    }
-  }
-
   // Get all tags with pagination
   async getAllTags(queryParams = {}) {
-    return Tag.search(queryParams.search, ['name'])
+    const response = await Tag.search(queryParams.search, ['name'])
       .where('name', queryParams.name)
       .paginate(queryParams.page, queryParams.limit)
       .sort('createdAt')
       .execute();
+
+    return await Tag.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
   }
 
+  // Get all trashed tags
+  async getTrashedTags(queryParams = {}) {
+    const response = await Tag.onlyTrashed()
+      .search(queryParams.search, ['name'])
+      .where('name', queryParams.name)
+      .paginate(queryParams.page, queryParams.limit)
+      .sort('createdAt')
+      .execute();
+
+    return await Tag.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
+  }
+
+  // Create a new tag
+  async create(tagData) {
+    try {
+      const response = await await Tag.create(tagData);
+      return await Tag.model.populate(response, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
   // Get tag by ID
   async getTagById(id) {
     try {
@@ -26,9 +55,15 @@ class TagService {
       if (!tag) {
         throw new Error('Tag not found');
       }
-      return tag;
+
+      return await Tag.model.populate(tag, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Failed to fetch tag: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -43,33 +78,39 @@ class TagService {
       Object.assign(tag, updateData);
       await tag.save();
 
-      return tag;
+      return await Tag.model.populate(tag, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Tag update failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   // Delete tag
   async deleteTag(id) {
     try {
-      const tag = await this.getTagById(id);
-      if (!tag) {
-        throw new Error('Tag not found');
-      }
-
-      await Tag.deleteOne({ _id: id });
+      await Tag.deleteById(id);
       return true;
     } catch (error) {
-      throw new Error(`Tag deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   // Restore tag
   async restoreTag(id) {
     try {
-      return await Tag.restoreById(id);
+      const tag = await await Tag.restoreById(id);
+      return await Tag.model.populate(tag, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Tag restoration failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -78,18 +119,8 @@ class TagService {
     try {
       return await Tag.forceDelete(id);
     } catch (error) {
-      throw new Error(`Tag force deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
-  }
-
-  // Get all trashed tags
-  async getTrashedTags(queryParams = {}) {
-    return Tag.search(queryParams.search, ['name'])
-      .where('deleted_at', { $ne: null })
-      .where('name', queryParams.name)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
   }
 
   // Get Tag By Slug
@@ -99,9 +130,14 @@ class TagService {
       if (!tag) {
         throw new Error('Tag not found');
       }
-      return tag;
+      return await Tag.model.populate(tag, [
+        {
+          path: 'author',
+          select: 'email name username',
+        },
+      ]);
     } catch (error) {
-      throw new Error(`Failed to fetch tag: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

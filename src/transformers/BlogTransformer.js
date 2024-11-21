@@ -38,14 +38,14 @@ class BlogTransformer {
 
   // Transform multiple blogs
   transformBlogs(blogs) {
-    return blogs.map((blog) => this.transformBlog(blog));
+    return blogs.data.map((blog) => this.transformBlog(blog));
   }
 
   // Transform paginated blog results
-  transformPaginatedBlogs(result) {
+  transformPaginatedBlogs(data) {
     return {
-      ...result.blogs,
-      data: this.transformBlogs(result.blogs.data),
+      ...data,
+      data: this.transformBlogs(data),
     };
   }
 }

@@ -5,9 +5,9 @@ class TagController {
   async index(req, res) {
     try {
       const tags = await TagService.getAllTags(req.query);
-      res.json({ success: true, ...tags });
+      res.json({ success: true, tags });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -33,7 +33,7 @@ class TagController {
       }
       res.json({ success: true, tag: tag });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -65,9 +65,9 @@ class TagController {
           .json({ success: false, message: 'Tag not found' });
       }
 
-      res.json({ success: true, data: {} });
+      res.json({ success: true, message: 'Tag deleted successfully' });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -84,7 +84,7 @@ class TagController {
 
       res.json({ success: true, tag: tag });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -101,7 +101,7 @@ class TagController {
 
       res.json({ success: true, data: {} });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -109,9 +109,9 @@ class TagController {
   async getTrashedTags(req, res) {
     try {
       const tags = await TagService.getTrashedTags(req.query);
-      res.json({ success: true, ...tags });
+      res.json({ success: true, tags });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -126,7 +126,7 @@ class TagController {
       }
       res.json({ success: true, tag: tag });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     }
   }
 }
