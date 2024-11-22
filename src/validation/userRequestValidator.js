@@ -1,29 +1,6 @@
 const { body } = require('express-validator');
 const User = require('../models/User');
-
-const isEmailUnique = async (email, userId = null) => {
-  const query = { email: email.toLowerCase() };
-  if (userId) {
-    query._id = { $ne: userId };
-  }
-  const user = await User.findOne(query);
-  if (user) {
-    throw new Error('Email already exists');
-  }
-  return true;
-};
-
-const isUserNameUnique = async (username, userId = null) => {
-  const query = { username: username.toLowerCase() };
-  if (userId) {
-    query._id = { $ne: userId };
-  }
-  const user = await User.findOne(query);
-  if (user) {
-    throw new Error('Username already exists');
-  }
-  return true;
-};
+const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules
 const userValidationRules = [
@@ -37,7 +14,7 @@ const userValidationRules = [
     .withMessage(
       'Username can only contain lowercase letters, numbers, dots, dashes, and underscores'
     )
-    .custom((username) => isUserNameUnique(username)),
+    .custom((username) => BaseHelper.isExists(User, username)),
 
   body('email')
     .trim()
@@ -45,7 +22,7 @@ const userValidationRules = [
     .withMessage('Please provide a valid email address')
     .normalizeEmail()
     .toLowerCase()
-    .custom((email) => isEmailUnique(email)),
+    .custom((email) => BaseHelper.isExists(User, email)),
 
   body('password')
     .isLength({ min: 6 })
@@ -79,7 +56,9 @@ const validateUpdateUser = [
     .withMessage(
       'Username can only contain lowercase letters, numbers, dots, dashes, and underscores'
     )
-    .custom((username, { req }) => isUserNameUnique(username, req.params.id)),
+    .custom((username, { req }) =>
+      BaseHelper.isExists(User, username, req.params.id)
+    ),
 
   body('email')
     .optional()
@@ -88,7 +67,9 @@ const validateUpdateUser = [
     .withMessage('Please provide a valid email address')
     .normalizeEmail()
     .toLowerCase()
-    .custom((email, { req }) => isEmailUnique(email, req.params.id)),
+    .custom((email, { req }) =>
+      BaseHelper.isExists(User, email, req.params.id)
+    ),
 
   body('password')
     .optional()

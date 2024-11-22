@@ -116,7 +116,7 @@ class AuthController {
   }
 
   // Get User Profile
-  static async getUserProfile(req, res) {
+  static async getProfile(req, res) {
     try {
       const result = await AuthService.getUserProfile(req.user._id);
 

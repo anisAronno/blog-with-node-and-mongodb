@@ -2,7 +2,7 @@ const TagService = require('../services/TagService');
 
 class TagController {
   // Get all tags
-  async index(req, res) {
+  async getAllTags(req, res) {
     try {
       const tags = await TagService.getAllTags(req.query);
       res.json({ success: true, tags });
@@ -12,7 +12,7 @@ class TagController {
   }
 
   // Create new tag
-  async store(req, res) {
+  async createTag(req, res) {
     try {
       const { name } = req.body;
       const savedTag = await TagService.create({ name, author: req.user._id });
@@ -23,7 +23,7 @@ class TagController {
   }
 
   // Get single tag
-  async show(req, res) {
+  async getTagById(req, res) {
     try {
       const tag = await TagService.getTagById(req.params.id);
       if (!tag) {
@@ -38,7 +38,7 @@ class TagController {
   }
 
   // Update tag
-  async update(req, res) {
+  async updateTag(req, res) {
     try {
       const { name } = req.body;
       const tag = await TagService.updateTag(req.params.id, { name });
@@ -55,7 +55,7 @@ class TagController {
   }
 
   // Delete tag
-  async destroy(req, res) {
+  async deleteTag(req, res) {
     try {
       const tag = await TagService.deleteTag(req.params.id);
 
@@ -89,7 +89,7 @@ class TagController {
   }
 
   // Force delete tag
-  async forceDeleteTag(req, res) {
+  async removeTag(req, res) {
     try {
       const tag = await TagService.forceDeleteTag(req.params.id);
 

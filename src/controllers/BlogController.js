@@ -5,11 +5,11 @@ class BlogController {
   // Get all blogs
   async getAllBlogs(req, res) {
     try {
-      const result = await BlogService.getAllBlogs(req.query);
+      const blogs = await BlogService.getAllBlogs(req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -22,11 +22,11 @@ class BlogController {
   // Get published blogs
   async getPublishedBlogs(req, res) {
     try {
-      const result = await BlogService.getPublishedBlogs(req.query);
+      const blogs = await BlogService.getPublishedBlogs(req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -39,11 +39,11 @@ class BlogController {
   //Get User Blogs
   async getUserBlogs(req, res) {
     try {
-      const result = await BlogService.getUserBlogs(req.user._id);
+      const blogs = await BlogService.getUserBlogs(req.user._id, req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -56,11 +56,14 @@ class BlogController {
   // Get user published blogs
   async getUserPublishedBlogs(req, res) {
     try {
-      const result = await BlogService.getUserPublishedBlogs(req.user._id);
+      const blogs = await BlogService.getUserPublishedBlogs(
+        req.params.id,
+        req.query
+      );
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -73,7 +76,7 @@ class BlogController {
   // Create a new blog
   async createBlog(req, res) {
     try {
-      const blog = await BlogService.create(req.body, req.user._id);
+      const blog = await BlogService.create(req.user._id, req.body);
 
       res.status(HTTP_STATUS_CODE.CREATED).json({
         success: true,
@@ -205,11 +208,11 @@ class BlogController {
   // Get trashed blogs
   async getTrashedBlogs(req, res) {
     try {
-      const result = await BlogService.getTrashedBlogs(req.query);
+      const blogs = await BlogService.getTrashedBlogs(req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -220,7 +223,7 @@ class BlogController {
   }
 
   // Force delete blog
-  async forceDeleteBlog(req, res) {
+  async removeBlog(req, res) {
     try {
       await BlogService.forceDeleteBlog(req.params.id, req.user);
 
@@ -245,11 +248,11 @@ class BlogController {
   // Get blogs by tag
   async getBlogsByTag(req, res) {
     try {
-      const result = await BlogService.getBlogsByTag(req.params.id, req.query);
+      const blogs = await BlogService.getBlogsByTag(req.params.id, req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
@@ -262,14 +265,14 @@ class BlogController {
   // Get blogs by category
   async getBlogsByCategory(req, res) {
     try {
-      const result = await BlogService.getBlogsByCategory(
+      const blogs = await BlogService.getBlogsByCategory(
         req.params.id,
         req.query
       );
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        blogs: BlogTransformer.transformPaginatedBlogs(result),
+        blogs: BlogTransformer.transformPaginatedBlogs(blogs),
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({

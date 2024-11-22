@@ -54,6 +54,7 @@ const CategoryModel = mongoose.model('Category', categorySchema);
 class Category extends BaseModel {
   constructor() {
     super(CategoryModel);
+    this.defaultPopulates = [{ path: 'author', select: 'email name username' }];
   }
 }
 

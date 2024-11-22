@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
-const BaseModel = require('./BaseModel.js');
+const BaseModel = require('./BaseModel');
 const slugify = require('slugify');
 
-// Blog Schema
 const blogSchema = new mongoose.Schema(
   {
     title: {
@@ -67,51 +66,27 @@ blogSchema.pre('validate', function (next) {
   next();
 });
 
-// Create model
 const BlogModel = mongoose.model('Blog', blogSchema);
 
-// Extend the base Model with Blog-specific methods
 class Blog extends BaseModel {
   constructor() {
     super(BlogModel);
+    this.defaultPopulates = [
+      { path: 'tags', select: 'name description' },
+      { path: 'categories', select: 'name description' },
+      { path: 'author', select: 'email name username' },
+    ];
   }
 
-  // Publish a blog
   async publish(blogId) {
-    try {
-      const blog = await this.model.findById(blogId);
-      if (!blog) {
-        throw new Error('Blog not found');
-      }
+    return this.executeQuery(async () => {
+      const blog = await this.findById(blogId);
+      if (!blog) throw new Error('Blog not found');
 
       blog.published = true;
       blog.published_at = new Date();
-      await blog.save();
-
-      return blog;
-    } catch (error) {
-      throw new Error(`Publish operation failed: ${error.message}`);
-    }
-  }
-
-  // find categories by blog
-  async findCategoriesByBlog(blogId) {
-    try {
-      return await this.model.findById(blogId).populate('categories');
-    } catch (error) {
-      throw new Error(
-        `Find categories by blog operation failed: ${error.message}`
-      );
-    }
-  }
-
-  //blogs with tags
-  async findTagsByBlog(blogId) {
-    try {
-      return await this.model.find({ tags: blogId }).populate('tags');
-    } catch (error) {
-      throw new Error(`Find blogs by tag operation failed: ${error.message}`);
-    }
+      return blog.save();
+    });
   }
 }
 

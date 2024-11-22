@@ -54,6 +54,7 @@ const SettingsModel = mongoose.model('Settings', settingsSchema);
 class Settings extends BaseModel {
   constructor() {
     super(SettingsModel);
+    this.defaultPopulates = [{ path: 'author', select: 'email name username' }];
   }
 
   // get setting by key

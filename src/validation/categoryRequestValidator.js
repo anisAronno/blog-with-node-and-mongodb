@@ -1,18 +1,6 @@
 const { body } = require('express-validator');
 const Category = require('../models/Category');
-
-// Check if category name is unique
-const isNameUnique = async (name, currentId = null) => {
-  const query = { name: name };
-  if (currentId) {
-    query._id = { $ne: currentId };
-  }
-  const category = await Category.findOne(query);
-  if (category) {
-    throw new Error('Category name already exists');
-  }
-  return true;
-};
+const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules for categories
 const categoryValidationRules = [
@@ -20,7 +8,7 @@ const categoryValidationRules = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Category name must be between 3 and 50 characters')
-    .custom((name) => isNameUnique(name)),
+    .custom((name) => BaseHelper.isExists(Category, name)),
 
   body('description')
     .optional()
@@ -39,7 +27,9 @@ const updateCategoryValidator = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Category name must be between 3 and 50 characters')
-    .custom((name, { req }) => isNameUnique(name, req.params.id)),
+    .custom((name, { req }) =>
+      BaseHelper.isExists(Category, name, req.params.id)
+    ),
 
   body('description')
     .optional()

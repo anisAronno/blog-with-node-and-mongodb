@@ -1,95 +1,68 @@
 const Tag = require('../models/Tag');
 
 class TagService {
-  // Get all tags with pagination
+  getBaseQuery(queryParams = {}) {
+    const { page, limit, search, name, sort = 'createdAt' } = queryParams;
+
+    return Tag.search(search, ['name'])
+      .where('name', name)
+      .paginate(page, limit)
+      .sort(sort);
+  }
+
+  async populateAuthor(response) {
+    return Tag.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
+  }
+
   async getAllTags(queryParams = {}) {
-    const response = await Tag.search(queryParams.search, ['name'])
-      .where('name', queryParams.name)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
-
-    return await Tag.model.populate(response, [
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    const response = await this.getBaseQuery(queryParams).execute();
+    return this.populateAuthor(response);
   }
 
-  // Get all trashed tags
   async getTrashedTags(queryParams = {}) {
-    const response = await Tag.onlyTrashed()
-      .search(queryParams.search, ['name'])
-      .where('name', queryParams.name)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
+    const response = await this.getBaseQuery(queryParams)
+      .onlyTrashed()
       .execute();
-
-    return await Tag.model.populate(response, [
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    return this.populateAuthor(response);
   }
 
-  // Create a new tag
-  async create(tagData) {
+  async create(authorId, tagData) {
     try {
-      const response = await await Tag.create(tagData);
-      return await Tag.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Tag.create({
+        ...tagData,
+        author: authorId,
+      });
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
-  // Get tag by ID
+
   async getTagById(id) {
     try {
-      const tag = await Tag.findById(id);
-      if (!tag) {
-        throw new Error('Tag not found');
-      }
-
-      return await Tag.model.populate(tag, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Tag.findById(id);
+      if (!response) throw new Error('Tag not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Update tag
   async updateTag(id, updateData) {
     try {
-      const tag = await this.getTagById(id);
-      if (!tag) {
-        throw new Error('Tag not found');
-      }
-
-      Object.assign(tag, updateData);
-      await tag.save();
-
-      return await Tag.model.populate(tag, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Tag.updateById(id, updateData);
+      if (!response) throw new Error('Tag not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Delete tag
   async deleteTag(id) {
     try {
       await Tag.deleteById(id);
@@ -99,43 +72,28 @@ class TagService {
     }
   }
 
-  // Restore tag
-  async restoreTag(id) {
+  async getTagBySlug(slug) {
     try {
-      const tag = await await Tag.restoreById(id);
-      return await Tag.model.populate(tag, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Tag.findOne({ slug });
+      if (!response) throw new Error('Tag not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Force delete tag
+  async restoreTag(id) {
+    try {
+      const response = await Tag.restoreById(id);
+      return this.populateAuthor(response);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async forceDeleteTag(id) {
     try {
       return await Tag.forceDelete(id);
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  // Get Tag By Slug
-  async getTagBySlug(slug) {
-    try {
-      const tag = await Tag.findOne({ slug });
-      if (!tag) {
-        throw new Error('Tag not found');
-      }
-      return await Tag.model.populate(tag, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
     } catch (error) {
       throw new Error(error.message);
     }

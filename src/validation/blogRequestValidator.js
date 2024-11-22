@@ -1,11 +1,14 @@
 const { body } = require('express-validator');
+const Blog = require('../models/Blog');
+const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules for blogs
 const blogValidationRules = [
   body('title')
     .trim()
     .isLength({ min: 3, max: 100 })
-    .withMessage('Title must be between 3 and 100 characters'),
+    .withMessage('Title must be between 3 and 100 characters')
+    .custom((title) => BaseHelper.isExists(Blog, title)),
 
   body('description')
     .trim()
@@ -53,7 +56,10 @@ const updateBlogValidator = [
     .optional()
     .trim()
     .isLength({ min: 3, max: 100 })
-    .withMessage('Title must be between 3 and 100 characters'),
+    .withMessage('Title must be between 3 and 100 characters')
+    .custom((title, { req }) =>
+      BaseHelper.isExists(Blog, title, req.params.id)
+    ),
 
   body('description')
     .optional()

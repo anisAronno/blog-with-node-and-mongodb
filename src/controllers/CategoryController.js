@@ -2,7 +2,7 @@ const CategoryService = require('../services/CategoryService');
 
 class CategoryController {
   // Get all categories
-  async index(req, res) {
+  async getAllCategories(req, res) {
     try {
       const categories = await CategoryService.getAllCategories(req.query);
       res.json({ success: true, categories });
@@ -12,7 +12,7 @@ class CategoryController {
   }
 
   // Create new category
-  async store(req, res) {
+  async createCategory(req, res) {
     try {
       const { name, description } = req.body;
       const category = await CategoryService.create({
@@ -27,7 +27,7 @@ class CategoryController {
   }
 
   // Get single category
-  async show(req, res) {
+  async getCategoryById(req, res) {
     try {
       const category = await CategoryService.getCategoryById(req.params.id);
       if (!category) {
@@ -42,7 +42,7 @@ class CategoryController {
   }
 
   // Update category
-  async update(req, res) {
+  async updateCategory(req, res) {
     const { name, description } = req.body;
     try {
       const category = await CategoryService.updateCategory(
@@ -66,7 +66,7 @@ class CategoryController {
   }
 
   // Delete category
-  async destroy(req, res) {
+  async deleteCategory(req, res) {
     try {
       const response = await CategoryService.deleteCategory(req.params.id);
       if (!response) {
@@ -104,7 +104,7 @@ class CategoryController {
   }
 
   // Force delete category
-  async forceDeleteCategory(req, res) {
+  async removeCategory(req, res) {
     try {
       await CategoryService.forceDeleteCategory(req.params.id, req.user);
 

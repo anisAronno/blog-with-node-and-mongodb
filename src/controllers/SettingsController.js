@@ -1,7 +1,7 @@
 const SettingsService = require('../services/SettingsService.js');
 
 class SettingsController {
-  static async getAll(req, res) {
+  static async getAllSettings(req, res) {
     try {
       const settings = await SettingsService.getAllSettings(req.query);
       res.status(200).json({ settings });
@@ -10,7 +10,7 @@ class SettingsController {
     }
   }
 
-  static async getPrivateOnly(req, res) {
+  static async getPrivateSettings(req, res) {
     try {
       const settings = await SettingsService.getAllPrivateSettings(req.query);
       res.status(200).json({ settings });
@@ -19,7 +19,7 @@ class SettingsController {
     }
   }
 
-  static async getPublicOnly(req, res) {
+  static async getPublicSettings(req, res) {
     try {
       const settings = await SettingsService.getAllPublicSettings(req.query);
       res.status(200).json({ settings });
@@ -28,7 +28,7 @@ class SettingsController {
     }
   }
 
-  static async store(req, res) {
+  static async createSetting(req, res) {
     try {
       const setting = await SettingsService.createSetting(
         req.body,
@@ -40,7 +40,7 @@ class SettingsController {
     }
   }
 
-  static async getByKey(req, res) {
+  static async getSettingByKey(req, res) {
     try {
       const setting = await SettingsService.getSettingByKey(req.params.key);
       res.status(200).json({ setting });
@@ -49,7 +49,7 @@ class SettingsController {
     }
   }
 
-  static async getPrivateByKey(req, res) {
+  static async getPrivateSettingByKey(req, res) {
     try {
       const setting = await SettingsService.getPrivateSettingByKey(
         req.params.key
@@ -60,7 +60,7 @@ class SettingsController {
     }
   }
 
-  static async getPublicByKey(req, res) {
+  static async getPublicSettingByKey(req, res) {
     try {
       const setting = await SettingsService.getPublicSettingByKey(
         req.params.key
@@ -71,7 +71,7 @@ class SettingsController {
     }
   }
 
-  static async updateByKey(req, res) {
+  static async updateSetting(req, res) {
     try {
       const setting = await SettingsService.updateSettingByKey(
         req.params.key,
@@ -83,7 +83,7 @@ class SettingsController {
     }
   }
 
-  static async deleteByKey(req, res) {
+  static async deleteSetting(req, res) {
     try {
       await SettingsService.deleteSettingByKey(req.params.key);
       res.status(200).json({ message: 'Setting deleted successfully' });

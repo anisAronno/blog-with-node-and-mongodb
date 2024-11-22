@@ -1,18 +1,6 @@
 const { body } = require('express-validator');
 const Settings = require('../models/Settings');
-
-// Check if settings key is unique
-const isKeyUnique = async (key, currentId = null) => {
-  const query = { key: key.toLowerCase() };
-  if (currentId) {
-    query._id = { $ne: currentId };
-  }
-  const setting = await Settings.findOne(query);
-  if (setting) {
-    throw new Error('Settings key already exists');
-  }
-  return true;
-};
+const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules for settings
 const settingsValidationRules = [
@@ -24,7 +12,7 @@ const settingsValidationRules = [
     .withMessage(
       'Key can only contain letters, numbers, dots, dashes, and underscores'
     )
-    .custom((key) => isKeyUnique(key)),
+    .custom((key) => BaseHelper.isExists(Settings, key)),
 
   body('value').trim().notEmpty().withMessage('Value is required'),
 
@@ -50,7 +38,9 @@ const validateUpdateSettings = [
     .withMessage(
       'Key can only contain letters, numbers, dots, dashes, and underscores'
     )
-    .custom((key, { req }) => isKeyUnique(key, req.params.id)),
+    .custom((key, { req }) =>
+      BaseHelper.isExists(Settings, key, req.params.id)
+    ),
 
   body('value')
     .optional()

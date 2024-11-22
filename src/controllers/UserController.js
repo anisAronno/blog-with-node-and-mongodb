@@ -82,7 +82,7 @@ class UserController {
     }
   }
 
-  static async forceDeleteUser(req, res) {
+  static async removeUser(req, res) {
     try {
       await UserService.forceDeleteUser(req.params.id);
 

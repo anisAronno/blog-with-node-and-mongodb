@@ -1,18 +1,6 @@
 const { body } = require('express-validator');
 const Contact = require('../models/Contact');
-
-// Check if email is unique
-const isEmailUnique = async (email, currentId = null) => {
-  const query = { email };
-  if (currentId) {
-    query._id = { $ne: currentId };
-  }
-  const contact = await Contact.findOne(query);
-  if (contact) {
-    throw new Error('Email already exists');
-  }
-  return true;
-};
+const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules for contacts
 const contactValidationRules = [
@@ -27,7 +15,7 @@ const contactValidationRules = [
     .withMessage('Email is required')
     .isEmail()
     .withMessage('Invalid email address')
-    .custom((email) => isEmailUnique(email)),
+    .custom((email) => BaseHelper.isExists(Contact, email)),
 
   body('phone')
     .optional()
@@ -62,7 +50,9 @@ const updateContactValidator = [
     .trim()
     .isEmail()
     .withMessage('Invalid email address')
-    .custom((email, { req }) => isEmailUnique(email, req.params.id)),
+    .custom((email, { req }) =>
+      BaseHelper.isExists(Contact, email, req.params.id)
+    ),
 
   body('phone')
     .optional()

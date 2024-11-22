@@ -1,109 +1,128 @@
 const Contact = require('../models/Contact');
 
 class ContactService {
-  // Create a new contact
-  async createContact(data) {
-    try {
-      return await Contact.create(data);
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
+  getBaseQuery(queryParams = {}) {
+    const {
+      page,
+      limit,
+      search,
+      name,
+      email,
+      phone,
+      message,
+      subject,
+      sort = 'createdAt',
+    } = queryParams;
 
-  // Get all contacts with pagination
-  async getAllContacts(queryParams = {}) {
-    return Contact.search(queryParams.search, [
+    return Contact.search(search, [
       'name',
       'email',
       'phone',
       'message',
       'subject',
     ])
-      .where('name', queryParams.name)
-      .where('email', queryParams.email)
-      .where('phone', queryParams.phone)
-      .where('message', queryParams.message)
-      .where('subject', queryParams.subject)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
+      .where('name', name)
+      .where('email', email)
+      .where('phone', phone)
+      .where('message', message)
+      .where('subject', subject)
+      .paginate(page, limit)
+      .sort(sort);
   }
 
-  // Get contact by ID
+  async getAllContacts(queryParams = {}) {
+    try {
+      return await this.getBaseQuery(queryParams).execute();
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async getTrashedContacts(queryParams = {}) {
+    try {
+      return await this.getBaseQuery(queryParams).onlyTrashed().execute();
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async createContact(authorId, contactData) {
+    try {
+      return await Contact.create({
+        ...contactData,
+        author: authorId,
+      });
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async getContactById(id) {
     try {
       const contact = await Contact.findById(id);
-      if (!contact) {
-        throw new Error('Contact not found');
-      }
+      if (!contact) throw new Error('Contact not found');
       return contact;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Update contact
   async updateContact(id, updateData) {
     try {
-      const contact = await this.getContactById(id);
-      if (!contact) {
-        throw new Error('Contact not found');
-      }
-
-      Object.assign(contact, updateData);
-      await contact.save();
-
+      const contact = await Contact.updateById(id, updateData);
+      if (!contact) throw new Error('Contact not found');
       return contact;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Delete contact
   async deleteContact(id) {
     try {
-      return await Contact.deleteById(id);
+      const contact = await Contact.deleteById(id);
+      if (!contact) throw new Error('Contact not found');
+      return true;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Restore contact
   async restoreContact(id) {
     try {
-      return await Contact.restoreById(id);
+      const contact = await Contact.restoreById(id);
+      if (!contact) throw new Error('Contact not found');
+      return contact;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Force delete contact
   async forceDeleteContact(id) {
     try {
-      return await Contact.forceDelete(id);
+      const contact = await Contact.forceDelete(id);
+      if (!contact) throw new Error('Contact not found');
+      return true;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Get all trashed contacts
-  async getTrashedContacts(queryParams = {}) {
-    return Contact.onlyTrashed()
-      .search(queryParams.search, [
-        'name',
-        'email',
-        'phone',
-        'message',
-        'subject',
-      ])
-      .where('name', queryParams.name)
-      .where('email', queryParams.email)
-      .where('phone', queryParams.phone)
-      .where('message', queryParams.message)
-      .where('subject', queryParams.subject)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
+  async getContactsByEmail(email) {
+    try {
+      const contacts = await this.getBaseQuery({ email }).execute();
+      return contacts;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async getContactsByPhone(phone) {
+    try {
+      const contacts = await this.getBaseQuery({ phone }).execute();
+      return contacts;
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 }
 

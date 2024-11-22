@@ -1,7 +1,6 @@
 const ProjectError = require('../errors/ProjectError.js');
 const crypto = require('crypto');
 const Logger = require('../utils/Logger');
-
 class BaseHelper {
   /**
    * Stop process with custom error
@@ -44,6 +43,28 @@ class BaseHelper {
     }
 
     return result;
+  }
+
+  /**
+   *
+   * @param {BaseModel} modelName
+   * @param {string} title
+   * @param {?string} currentId
+   * @returns {Promise<boolean>}
+   */
+  static isExists(modelName, title, currentId = null) {
+    const query = { title: title };
+    if (currentId) {
+      query._id = { $ne: currentId };
+    }
+    const model = modelName.findOne(query);
+
+    if (model) {
+      throw new Error(
+        `${modelName?.model?.modelName?.toLowerCase() ?? ''} title already exists`
+      );
+    }
+    return true;
   }
 }
 

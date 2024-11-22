@@ -36,19 +36,15 @@ class AppServer {
   }
 
   setupRoutes() {
-    this.app.use('/api', routes);
+    this.app.use('/', routes);
 
-    this.app.use('/', (req, res) => {
-      if (req.path === '/') {
-        res.status(HTTP_STATUS_CODE.OK).json({ message: 'Service is running' });
-      } else {
-        Logger.log(req.path);
+    this.app.use((req, res) => {
+        Logger.log(req.path); // Log the path for debugging
 
         res.status(HTTP_STATUS_CODE.NOT_FOUND).json({
-          success: false,
-          message: 'Resource not found',
+            success: false,
+            message: 'Resource not found',
         });
-      }
     });
   }
 

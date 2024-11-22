@@ -1,7 +1,7 @@
 const ContactService = require('../services/ContactService');
 
 class ContactController {
-  async index(req, res) {
+  async getAllContacts(req, res) {
     try {
       const contacts = await ContactService.getAllContacts(req.query);
       res.status(200).json({ contacts });
@@ -10,7 +10,7 @@ class ContactController {
     }
   }
 
-  async store(req, res) {
+  async createContact(req, res) {
     try {
       const contact = await ContactService.createContact(req.body);
       res.status(201).json({ contact });
@@ -19,7 +19,7 @@ class ContactController {
     }
   }
 
-  async show(req, res) {
+  async getContactById(req, res) {
     try {
       const contact = await ContactService.getContactById(req.params.id);
       if (!contact) {
@@ -31,7 +31,7 @@ class ContactController {
     }
   }
 
-  async update(req, res) {
+  async updateContact(req, res) {
     try {
       const contact = await ContactService.updateContact(
         req.params.id,
@@ -46,7 +46,7 @@ class ContactController {
     }
   }
 
-  async destroy(req, res) {
+  async deleteContact(req, res) {
     try {
       const contact = await ContactService.deleteContact(req.params.id);
       if (!contact) {
@@ -58,7 +58,7 @@ class ContactController {
     }
   }
 
-  async restore(req, res) {
+  async restoreContact(req, res) {
     try {
       const contact = await ContactService.restoreContact(req.params.id);
       if (!contact) {
@@ -70,7 +70,7 @@ class ContactController {
     }
   }
 
-  async forceDestroy(req, res) {
+  async removeContact(req, res) {
     try {
       const contact = await ContactService.forceDeleteContact(req.params.id);
       if (!contact) {
@@ -82,7 +82,7 @@ class ContactController {
     }
   }
 
-  async trashed(req, res) {
+  async getTrashedContacts(req, res) {
     try {
       const contacts = await ContactService.getTrashedContacts(req.query);
       res.status(200).json({ contacts });

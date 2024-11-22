@@ -1,98 +1,76 @@
 const Category = require('../models/Category');
 
 class CategoryService {
-  // Get all categories with pagination
+  getBaseQuery(queryParams = {}) {
+    const {
+      page,
+      limit,
+      search,
+      name,
+      description,
+      sort = 'createdAt',
+    } = queryParams;
+
+    return Category.search(search, ['name', 'description'])
+      .where('name', name)
+      .where('description', description)
+      .paginate(page, limit)
+      .sort(sort);
+  }
+
+  async populateAuthor(response) {
+    return Category.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
+  }
+
   async getAllCategories(queryParams = {}) {
-    const response = await Category.search(queryParams.search, [
-      'name',
-      'description',
-    ])
-      .where('name', queryParams.name)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
-
-    return await Category.model.populate(response, [
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    const response = await this.getBaseQuery(queryParams).execute();
+    return this.populateAuthor(response);
   }
 
-  // Get trashed categories
   async getTrashedCategories(queryParams = {}) {
-    const response = await Category.onlyTrashed()
-      .search(queryParams.search, ['name', 'description'])
-      .where('name', queryParams.name)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
+    const response = await this.getBaseQuery(queryParams)
+      .onlyTrashed()
       .execute();
-
-    return await Category.model.populate(response, [
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    return this.populateAuthor(response);
   }
 
-  // Create a new category
-  async create(categoryData) {
+  async create(authorId, categoryData) {
     try {
-      const response = await Category.create(categoryData);
-
-      return await Category.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Category.create({
+        ...categoryData,
+        author: authorId,
+      });
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Get category by ID
   async getCategoryById(id) {
     try {
       const response = await Category.findById(id);
-      return await Category.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      if (!response) throw new Error('Category not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Update category
   async updateCategory(id, updateData) {
     try {
-      const category = await this.getCategoryById(id);
-      if (!category) {
-        throw new Error('Category not found');
-      }
-
-      Object.assign(category, updateData);
-      await category.save();
-
-      return await Category.model.populate(category, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Category.updateById(id, updateData);
+      if (!response) throw new Error('Category not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  // Delete category
   async deleteCategory(id) {
     try {
       await Category.deleteById(id);
@@ -102,40 +80,28 @@ class CategoryService {
     }
   }
 
-  // restore category
-  async restoreCategory(id) {
-    try {
-      const response = await Category.restoreById(id);
-      return await Category.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  // force delete category
-  async forceDeleteCategory(id) {
-    try {
-      return await Category.forceDelete(id);
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  // Get Category By Slug
   async getCategoryBySlug(slug) {
     try {
       const response = await Category.findOne({ slug });
-      return await Category.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      if (!response) throw new Error('Category not found');
+      return this.populateAuthor(response);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async restoreCategory(id) {
+    try {
+      const response = await Category.restoreById(id);
+      return this.populateAuthor(response);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async forceDeleteCategory(id) {
+    try {
+      return await Category.forceDelete(id);
     } catch (error) {
       throw new Error(error.message);
     }

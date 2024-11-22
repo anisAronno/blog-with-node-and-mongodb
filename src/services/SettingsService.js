@@ -1,78 +1,64 @@
-const Settings = require('../models/Settings.js');
+const Settings = require('../models/Settings');
 
 class SettingsService {
-  static async getAllSettings(queryParams) {
-    try {
-      const response = await Settings.search(queryParams.search, [
-        'key',
-        'value',
-      ])
-        .where('key', queryParams.title)
-        .where('value', queryParams.description)
-        .paginate(queryParams.page, queryParams.limit)
-        .sort('createdAt')
-        .execute();
+  getBaseQuery(queryParams = {}) {
+    const {
+      page,
+      limit,
+      search,
+      title: key,
+      description: value,
+      sort = 'createdAt',
+    } = queryParams;
 
-      return await Settings.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+    return Settings.search(search, ['key', 'value'])
+      .where('key', key)
+      .where('value', value)
+      .paginate(page, limit)
+      .sort(sort);
+  }
+
+  async populateAuthor(response) {
+    return Settings.model.populate(response, [
+      {
+        path: 'author',
+        select: 'email name username',
+      },
+    ]);
+  }
+
+  async getAllSettings(queryParams = {}) {
+    try {
+      const response = await this.getBaseQuery(queryParams).execute();
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async getAllPrivateSettings(queryParams) {
+  async getAllPrivateSettings(queryParams = {}) {
     try {
-      const response = await Settings.search(queryParams.search, [
-        'key',
-        'value',
-      ])
+      const response = await this.getBaseQuery(queryParams)
         .where('private', true)
-        .where('key', queryParams.title)
-        .where('value', queryParams.description)
-        .paginate(queryParams.page, queryParams.limit)
-        .sort('createdAt')
         .execute();
-
-      return await Settings.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async getAllPublicSettings(queryParams) {
+  async getAllPublicSettings(queryParams = {}) {
     try {
-      const response = await Settings.search(queryParams.search, [
-        'key',
-        'value',
-      ])
+      const response = await this.getBaseQuery(queryParams)
         .where('private', false)
-        .where('key', queryParams.title)
-        .where('value', queryParams.description)
-        .paginate(queryParams.page, queryParams.limit)
-        .sort('createdAt')
         .execute();
-
-      return await Settings.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async createSetting(settingData, authorId) {
+  async createSetting(authorId, settingData) {
     try {
       // Check if setting with same key already exists
       const existingSetting = await Settings.findOne({ key: settingData.key });
@@ -85,100 +71,92 @@ class SettingsService {
         author: authorId,
       });
 
-      return await Settings.model.populate(response, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async getSettingByKey(key) {
+  async getSettingByKey(key) {
     try {
-      const setting = await Settings.getSettingsByKey(key);
-      if (!setting) {
-        throw new Error('Setting not found');
-      }
-
-      return await Settings.model.populate(setting, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Settings.getSettingsByKey(key);
+      if (!response) throw new Error('Setting not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async getPrivateSettingByKey(key) {
+  async getPrivateSettingByKey(key) {
     try {
-      const setting = await Settings.getPrivateSettingsByKey(key);
-      if (!setting) {
-        throw new Error('Setting not found');
-      }
-
-      return await Settings.model.populate(setting, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Settings.getPrivateSettingsByKey(key);
+      if (!response) throw new Error('Setting not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async getPublicSettingByKey(key) {
+  async getPublicSettingByKey(key) {
     try {
-      const setting = await Settings.getPublicSettingsByKey(key);
-      if (!setting) {
-        throw new Error('Setting not found');
-      }
-      return await Settings.model.populate(setting, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Settings.getPublicSettingsByKey(key);
+      if (!response) throw new Error('Setting not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async updateSettingByKey(key, updateData) {
+  async updateSettingByKey(key, updateData) {
     try {
-      // Update the setting
-      const setting = await Settings.updateSettingsByKey(key, updateData);
-
-      if (!setting) {
-        throw new Error('Setting not found');
-      }
-
-      return await Settings.model.populate(setting, [
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
+      const response = await Settings.updateSettingsByKey(key, updateData);
+      if (!response) throw new Error('Setting not found');
+      return this.populateAuthor(response);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  static async deleteSettingByKey(key) {
+  async deleteSettingByKey(key) {
     try {
       const response = await Settings.deleteSettingsByKey(key);
-      if (!response) {
-        throw new Error('Setting not found');
-      }
+      if (!response) throw new Error('Setting not found');
+      return true;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async getTrashedSettings(queryParams = {}) {
+    try {
+      const response = await this.getBaseQuery(queryParams)
+        .onlyTrashed()
+        .execute();
+      return this.populateAuthor(response);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async restoreSetting(key) {
+    try {
+      const response = await Settings.restoreByKey(key);
+      if (!response) throw new Error('Setting not found');
+      return this.populateAuthor(response);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async forceDeleteSetting(key) {
+    try {
+      const response = await Settings.forceDeleteByKey(key);
+      if (!response) throw new Error('Setting not found');
+      return true;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 }
 
-module.exports = SettingsService;
+module.exports = new SettingsService();

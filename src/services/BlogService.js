@@ -1,268 +1,94 @@
 const Blog = require('../models/Blog');
 
 class BlogService {
-  // Get paginated blogs with filtering
-  async getAllBlogs(queryParams = {}) {
-    const { page, limit, title, description, search } = queryParams;
+  getBaseQuery(queryParams = {}) {
+    const {
+      page,
+      limit,
+      search,
+      title,
+      description,
+      sort = 'createdAt',
+    } = queryParams;
 
-    const searchFields = ['title', 'description'];
-    const query = Blog.search(search, searchFields)
+    return Blog.search(search, ['title', 'description'])
       .where('title', title)
       .where('description', description)
       .paginate(page, limit)
-      .sort('createdAt');
-
-    const response = await query.execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      { path: 'author', select: 'email name username' },
-    ]);
+      .sort(sort);
   }
-  // Get published blogs
+
+  async getAllBlogs(queryParams = {}) {
+    return this.getBaseQuery(queryParams).execute();
+  }
+
   async getPublishedBlogs(queryParams = {}) {
-    const response = await Blog.search(queryParams.search, [
-      'title',
-      'description',
-    ])
-      .where('published', true)
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    return this.getBaseQuery(queryParams).where('published', true).execute();
   }
 
-  // Get user blogs
   async getUserBlogs(authorId, queryParams = {}) {
-    const response = await Blog.search(queryParams.search, [
-      'title',
-      'description',
-    ])
-      .where('author', authorId)
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    return this.getBaseQuery(queryParams).where('author', authorId).execute();
   }
 
-  // Get user published blogs
   async getUserPublishedBlogs(authorId, queryParams = {}) {
-    const response = await Blog.search(queryParams.search, [
-      'title',
-      'description',
-    ])
+    return this.getBaseQuery(queryParams)
       .where('author', authorId)
       .where('published', true)
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
       .execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
   }
 
-  // Get trashed blogs
   async getTrashedBlogs(queryParams = {}) {
-    const response = await Blog.onlyTrashed()
-      .search(queryParams.search, ['title', 'description'])
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
-      .execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
+    return this.getBaseQuery(queryParams).onlyTrashed().execute();
   }
 
-  // Get blogs by tag
   async getBlogsByTag(tagId, queryParams = {}) {
-    const response = await Blog.search(queryParams.search, [
-      'title',
-      'description',
-    ])
+    return this.getBaseQuery(queryParams)
       .where('tags', { $in: [tagId] })
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
       .execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
   }
 
-  // Get blogs by category
   async getBlogsByCategory(categoryId, queryParams = {}) {
-    const response = await Blog.search(queryParams.search, [
-      'title',
-      'description',
-    ])
+    return this.getBaseQuery(queryParams)
       .where('categories', { $in: [categoryId] })
-      .where('title', queryParams.title)
-      .where('description', queryParams.description)
-      .paginate(queryParams.page, queryParams.limit)
-      .sort('createdAt')
       .execute();
-
-    return await Blog.model.populate(response, [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
   }
 
-  // Create a new blog
-  async create(blogData, authorId) {
-    try {
-      const blog = await Blog.create({
-        ...blogData,
-        author: authorId,
-        tags: blogData.tags ?? [],
-        categories: blogData.categories ?? [],
-      });
-
-      return await Blog.model.populate(blog, [
-        { path: 'tags', select: 'name description' },
-        { path: 'categories', select: 'name description' },
-        { path: 'author', select: 'email name username' },
-      ]);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+  async create(authorId, blogData) {
+    return Blog.create({
+      ...blogData,
+      author: authorId,
+      tags: blogData.tags ?? [],
+      categories: blogData.categories ?? [],
+    });
   }
 
-  // Get blog by ID
   async getBlogById(id) {
-    try {
-      const blog = await Blog.findById(id);
-      if (!blog) {
-        throw new Error('Blog not found');
-      }
-
-      return await Blog.model.populate(blog, [
-        { path: 'tags', select: 'name description' },
-        { path: 'categories', select: 'name description' },
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const blog = await Blog.findById(id);
+    if (!blog) throw new Error('Blog not found');
+    return blog;
   }
 
-  // Update blog
   async updateBlog(id, updateData) {
-    try {
-      const blog = await Blog.updateById(id, updateData);
-      return await Blog.model.populate(blog, [
-        { path: 'tags', select: 'name description' },
-        { path: 'categories', select: 'name description' },
-        { path: 'author', select: 'email name username' },
-      ]);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return Blog.updateById(id, updateData);
   }
 
-  // Delete blog
   async deleteBlog(id) {
-    try {
-      await Blog.deleteById(id);
-      return true;
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    await Blog.deleteById(id);
+    return true;
   }
 
-  // Get blog by slug
   async getBlogBySlug(slug) {
-    try {
-      const blog = await Blog.findOne({ slug, published: true });
-      if (!blog) {
-        throw new Error('Blog not found');
-      }
-
-      return await Blog.model.populate(blog, [
-        { path: 'tags', select: 'name description' },
-        { path: 'categories', select: 'name description' },
-        {
-          path: 'author',
-          select: 'email name username',
-        },
-      ]);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const blog = await Blog.findOne({ slug, published: true });
+    if (!blog) throw new Error('Blog not found');
+    return blog;
   }
 
-  // Restore blog
   async restoreBlog(id) {
-    try {
-      const blog = await Blog.restoreById(id);
-      return await Blog.model.populate(blog, [
-        { path: 'tags', select: 'name description' },
-        { path: 'categories', select: 'name description' },
-        { path: 'author', select: 'email name username' },
-      ]);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return Blog.restoreById(id);
   }
 
-  // Force delete blog
   async forceDeleteBlog(id) {
-    try {
-      return await Blog.forceDelete(id);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return Blog.forceDelete(id);
   }
 }
 
