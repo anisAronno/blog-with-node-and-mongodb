@@ -14,7 +14,9 @@ const userValidationRules = [
     .withMessage(
       'Username can only contain lowercase letters, numbers, dots, dashes, and underscores'
     )
-    .custom((username) => BaseHelper.isExists(User, username)),
+    .custom(async (username) =>
+      BaseHelper.isExists(User, { username: username })
+    ),
 
   body('email')
     .trim()
@@ -22,7 +24,7 @@ const userValidationRules = [
     .withMessage('Please provide a valid email address')
     .normalizeEmail()
     .toLowerCase()
-    .custom((email) => BaseHelper.isExists(User, email)),
+    .custom(async (email) => await BaseHelper.isExists(User, { email: email })),
 
   body('password')
     .isLength({ min: 6 })
@@ -56,8 +58,9 @@ const validateUpdateUser = [
     .withMessage(
       'Username can only contain lowercase letters, numbers, dots, dashes, and underscores'
     )
-    .custom((username, { req }) =>
-      BaseHelper.isExists(User, username, req.params.id)
+    .custom(
+      async (username, { req }) =>
+        await BaseHelper.isExists(User, { username: username }, req.params.id)
     ),
 
   body('email')
@@ -67,8 +70,9 @@ const validateUpdateUser = [
     .withMessage('Please provide a valid email address')
     .normalizeEmail()
     .toLowerCase()
-    .custom((email, { req }) =>
-      BaseHelper.isExists(User, email, req.params.id)
+    .custom(
+      async (email, { req }) =>
+        await BaseHelper.isExists(User, { email: email }, req.params.id)
     ),
 
   body('password')

@@ -12,7 +12,7 @@ const settingsValidationRules = [
     .withMessage(
       'Key can only contain letters, numbers, dots, dashes, and underscores'
     )
-    .custom((key) => BaseHelper.isExists(Settings, key)),
+    .custom(async (key) => await BaseHelper.isExists(Settings, { key: key })),
 
   body('value').trim().notEmpty().withMessage('Value is required'),
 
@@ -38,8 +38,9 @@ const validateUpdateSettings = [
     .withMessage(
       'Key can only contain letters, numbers, dots, dashes, and underscores'
     )
-    .custom((key, { req }) =>
-      BaseHelper.isExists(Settings, key, req.params.id)
+    .custom(
+      async (key, { req }) =>
+        await BaseHelper.isExists(Settings, { key: key }, req.params.id)
     ),
 
   body('value')

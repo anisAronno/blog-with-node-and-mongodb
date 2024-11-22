@@ -121,17 +121,22 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 
 ### Categories
 
-| Method | Endpoint                           | Description                 |
-| ------ | ---------------------------------- | --------------------------- |
-| GET    | `/api/v1/categories`               | List all categories         |
-| POST   | `/api/v1/categories`               | Create a category           |
-| GET    | `/api/v1/categories/:id`           | Get category details by ID  |
-| PUT    | `/api/v1/categories/:id`           | Update category by ID       |
-| DELETE | `/api/v1/categories/:id`           | Soft delete category by ID  |
-| POST   | `/api/v1/categories/:id/restore`   | Restore a deleted category  |
-| DELETE | `/api/v1/categories/:id/permanent` | Permanently delete category |
-| GET    | `/api/v1/categories/trash`         | List trashed categories     |
-| GET    | `/api/v1/categories/slug/:slug`    | Get category by slug        |
+| Method | Endpoint                                      | Description                      |
+| ------ | --------------------------------------------- | -------------------------------- |
+| GET    | `/api/v1/categories`                          | List all categories              |
+| POST   | `/api/v1/categories`                          | Create a category                |
+| GET    | `/api/v1/categories/:id`                      | Get category details by ID       |
+| PUT    | `/api/v1/categories/:id`                      | Update category by ID            |
+| DELETE | `/api/v1/categories/:id`                      | Soft delete category by ID       |
+| POST   | `/api/v1/categories/:id/restore`              | Restore a deleted category       |
+| DELETE | `/api/v1/categories/:id/permanent`            | Permanently delete category      |
+| GET    | `/api/v1/categories/trash`                    | List trashed categories          |
+| GET    | `/api/v1/categories/slug/:slug`               | Get category by slug             |
+| GET    | `/api/v1/categories/root/all`                 | Get all root level categories    |
+| GET    | `/api/v1/categories/categories/:id/hierarchy` | Get category with full hierarchy |
+| GET    | `/api/v1/categories/:id/subcategories`        | Get immediate subcategories      |
+| POST   | `/api/v1/categories/:parentId/subcategory`    | Create a new subcategory         |
+| PATCH  | `/api/v1/categories/:id/move`                 | Move category to new parent      |
 
 ### Tags
 
@@ -163,13 +168,13 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 
 | Method | Endpoint                         | Description                |
 | ------ | -------------------------------- | -------------------------- |
-| GET    | `/api/v1/contacts`               | List all contacts          |
-| POST   | `/api/v1/contacts`               | Create a contact           |
-| GET    | `/api/v1/contacts/:id`           | Get contact details by ID  |
-| PUT    | `/api/v1/contacts/:id`           | Update contact by ID       |
-| DELETE | `/api/v1/contacts/:id`           | Soft delete contact by ID  |
-| POST   | `/api/v1/contacts/:id/restore`   | Restore a deleted contact  |
-| DELETE | `/api/v1/contacts/:id/permanent` | Permanently delete contact |
+| GET    | `/api/v1/contact`               | List all contacts          |
+| POST   | `/api/v1/contact`               | Create a contact           |
+| GET    | `/api/v1/contact/:id`           | Get contact details by ID  |
+| PUT    | `/api/v1/contact/:id`           | Update contact by ID       |
+| DELETE | `/api/v1/contact/:id`           | Soft delete contact by ID  |
+| POST   | `/api/v1/contact/:id/restore`   | Restore a deleted contact  |
+| DELETE | `/api/v1/contact/:id/permanent` | Permanently delete contact |
 
 ---
 

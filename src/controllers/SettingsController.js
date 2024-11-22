@@ -31,8 +31,8 @@ class SettingsController {
   static async createSetting(req, res) {
     try {
       const setting = await SettingsService.createSetting(
-        req.body,
-        req.user._id
+        req.user._id,
+        req.body
       );
       res.status(201).json({ setting });
     } catch (error) {

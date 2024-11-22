@@ -46,11 +46,10 @@ class ContactService {
     }
   }
 
-  async createContact(authorId, contactData) {
+  async createContact(contactData) {
     try {
       return await Contact.create({
         ...contactData,
-        author: authorId,
       });
     } catch (error) {
       throw new Error(error.message);

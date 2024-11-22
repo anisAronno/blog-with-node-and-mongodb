@@ -8,7 +8,7 @@ const blogValidationRules = [
     .trim()
     .isLength({ min: 3, max: 100 })
     .withMessage('Title must be between 3 and 100 characters')
-    .custom((title) => BaseHelper.isExists(Blog, title)),
+    .custom(async (title) => await BaseHelper.isExists(Blog, { title: title })),
 
   body('description')
     .trim()
@@ -57,8 +57,9 @@ const updateBlogValidator = [
     .trim()
     .isLength({ min: 3, max: 100 })
     .withMessage('Title must be between 3 and 100 characters')
-    .custom((title, { req }) =>
-      BaseHelper.isExists(Blog, title, req.params.id)
+    .custom(
+      async (title, { req }) =>
+        await BaseHelper.isExists(Blog, { title: title }, req.params.id)
     ),
 
   body('description')

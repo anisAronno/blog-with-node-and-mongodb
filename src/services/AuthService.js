@@ -201,11 +201,13 @@ class AuthService {
       }
 
       return {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
       };
     } catch (error) {
       throw new Error(`Get profile failed: ${error.message}`);

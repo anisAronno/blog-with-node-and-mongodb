@@ -1,5 +1,6 @@
 const { body } = require('express-validator');
 const Tag = require('../models/Tag');
+const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules for tags
 const tagValidationRules = [
@@ -11,7 +12,7 @@ const tagValidationRules = [
     .withMessage(
       'Tag name can only contain letters, numbers, spaces, and hyphens'
     )
-    .custom((name) => Tag.isNameUnique(name)),
+    .custom(async (name) => await BaseHelper.isExists(Tag, { name: name })),
 ];
 
 // Create tag validation
@@ -28,7 +29,10 @@ const updateTagValidator = [
     .withMessage(
       'Tag name can only contain letters, numbers, spaces, and hyphens'
     )
-    .custom((name, { req }) => Tag.isNameUnique(name, req.params.id)),
+    .custom(
+      async (name, { req }) =>
+        await BaseHelper.isExists(Tag, { name: name }, req.params.id)
+    ),
 ];
 
 module.exports = {

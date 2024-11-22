@@ -15,7 +15,7 @@ class TagController {
   async createTag(req, res) {
     try {
       const { name } = req.body;
-      const savedTag = await TagService.create({ name, author: req.user._id });
+      const savedTag = await TagService.create(req.user._id, { name });
       res.status(201).json({ success: true, tag: savedTag });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
@@ -99,7 +99,7 @@ class TagController {
           .json({ success: false, message: 'Tag not found' });
       }
 
-      res.json({ success: true, data: {} });
+      res.json({ success: true, message: 'Tag deleted permanently' });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }

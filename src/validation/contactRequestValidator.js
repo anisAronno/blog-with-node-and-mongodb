@@ -1,6 +1,4 @@
 const { body } = require('express-validator');
-const Contact = require('../models/Contact');
-const BaseHelper = require('../utils/BaseHelper');
 
 // Common validation rules for contacts
 const contactValidationRules = [
@@ -14,8 +12,7 @@ const contactValidationRules = [
     .isLength({ min: 1 })
     .withMessage('Email is required')
     .isEmail()
-    .withMessage('Invalid email address')
-    .custom((email) => BaseHelper.isExists(Contact, email)),
+    .withMessage('Invalid email address'),
 
   body('phone')
     .optional()
@@ -49,10 +46,7 @@ const updateContactValidator = [
     .optional()
     .trim()
     .isEmail()
-    .withMessage('Invalid email address')
-    .custom((email, { req }) =>
-      BaseHelper.isExists(Contact, email, req.params.id)
-    ),
+    .withMessage('Invalid email address'),
 
   body('phone')
     .optional()

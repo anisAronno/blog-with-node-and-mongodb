@@ -1,19 +1,9 @@
 const AuthService = require('../services/AuthService');
-const { validationResult } = require('express-validator');
 
 class AuthController {
   // User Registration
   static async register(req, res) {
     try {
-      // Check for validation errors
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          errors: errors.array(),
-        });
-      }
-
       const result = await AuthService.register(req.body);
 
       res.status(201).json({
@@ -118,11 +108,11 @@ class AuthController {
   // Get User Profile
   static async getProfile(req, res) {
     try {
-      const result = await AuthService.getUserProfile(req.user._id);
+      const user = await AuthService.getUserProfile(req.user._id);
 
       res.status(200).json({
         success: true,
-        user: result,
+        data: user,
       });
     } catch (error) {
       res.status(400).json({
@@ -135,11 +125,11 @@ class AuthController {
   // Update Profile
   static async updateProfile(req, res) {
     try {
-      const result = await AuthService.updateProfile(req.user, req.body);
+      const user = await AuthService.updateProfile(req.user, req.body);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        user: result,
+        data: user,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({

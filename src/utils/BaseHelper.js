@@ -52,8 +52,7 @@ class BaseHelper {
    * @param {?string} currentId
    * @returns {Promise<boolean>}
    */
-  static async isExists(modelName, title, currentId = null) {
-    const query = { title: title };
+  static async isExists(modelName, query, currentId = null) {
     if (currentId) {
       query._id = { $ne: currentId };
     }
@@ -61,7 +60,7 @@ class BaseHelper {
 
     if (model) {
       throw new Error(
-        `${modelName?.model?.modelName?.toLowerCase() ?? ''} title already exists`
+        `${Object.keys(query).length > 0 ? Object.keys(query)[0] : ''} already exists`
       );
     }
     return true;

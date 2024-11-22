@@ -36,7 +36,9 @@ class UserService {
 
   async getUserById(id) {
     try {
-      const user = await User.findById(id).select(['-password', '-tokens']);
+      const user = await User.model
+        .findById(id)
+        .select(['-password', '-tokens']);
 
       if (!user) throw new Error('User not found');
 
@@ -65,9 +67,11 @@ class UserService {
           return obj;
         }, {});
 
-      const user = await User.updateById(id, filteredData, {
-        new: true,
-      }).select(['-password', '-tokens']);
+      const user = await User.model
+        .findByIdAndUpdate(id, filteredData, {
+          new: true,
+        })
+        .select(['-password', '-tokens']);
 
       if (!user) throw new Error('User not found');
 
@@ -89,7 +93,7 @@ class UserService {
 
   async restoreUser(id) {
     try {
-      const user = await User.restoreById(id).select(['-password', '-tokens']);
+      const user = await User.restoreById(id);
 
       if (!user) throw new Error('User not found');
 

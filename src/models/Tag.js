@@ -33,7 +33,6 @@ const tagSchema = new mongoose.Schema(
   }
 );
 
-// Slug created while create or update tag
 tagSchema.pre('validate', function (next) {
   if (this.isNew || this.isModified('name')) {
     this.slug = slugify(this.name, { lower: true, strict: true });
