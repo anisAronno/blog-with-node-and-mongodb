@@ -1,11 +1,11 @@
 'use strict';
 
 const express = require('express');
-const config = require('./src/config');
+const config = require('./src/config/app.constants.js');
 const LoggingMiddleware = require('./src/middleware/LoggingMiddleware');
 const ErrorHandler = require('./src/middleware/ErrorHandler');
 const routes = require('./src/routes');
-const { HTTP_STATUS_CODE } = require('./src/config/constants.js');
+const { HTTP_STATUS_CODE } = require('./src/config/http.constants.js');
 const connectToDatabase = require('./src/db');
 const Logger = require('./src/utils/Logger');
 

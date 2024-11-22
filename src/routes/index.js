@@ -7,7 +7,7 @@ const {
   CATEGORY_ROUTES,
   SETTINGS_ROUTES,
   CONTACT_ROUTES,
-} = require('../config/routes.constants');
+} = require('../config/route.constants');
 
 // Import Controllers
 const BlogController = require('../controllers/BlogController');

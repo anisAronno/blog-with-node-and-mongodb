@@ -1,7 +1,7 @@
 // db.js
 const mongoose = require('mongoose');
 const Logger = require('../utils/Logger');
-const APP_CONFIG = require('../config');
+const APP_CONFIG = require('../config/app.constants');
 
 const connectToDatabase = async () => {
   try {
