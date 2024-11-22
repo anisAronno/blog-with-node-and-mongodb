@@ -52,12 +52,12 @@ class BaseHelper {
    * @param {?string} currentId
    * @returns {Promise<boolean>}
    */
-  static isExists(modelName, title, currentId = null) {
+  static async isExists(modelName, title, currentId = null) {
     const query = { title: title };
     if (currentId) {
       query._id = { $ne: currentId };
     }
-    const model = modelName.findOne(query);
+    const model = await modelName.findOne(query);
 
     if (model) {
       throw new Error(
