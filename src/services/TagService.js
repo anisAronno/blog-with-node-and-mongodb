@@ -1,102 +1,155 @@
 const Tag = require('../models/Tag');
 
 class TagService {
+  /**
+   * Get base query with common relations and conditions
+   */
   getBaseQuery(queryParams = {}) {
-    const { page, limit, search, name, sort = 'createdAt' } = queryParams;
+    const {
+      search,
+      name,
+      sort = 'createdAt',
+      withRelations = true,
+    } = queryParams;
 
-    return Tag.search(search, ['name'])
+    let query = Tag;
+
+    // Add common relations if needed
+    if (withRelations) {
+      query = query.with(['author name,email,username']);
+    }
+
+    // Apply common filters
+    query = query
+      .search(search, ['name'])
       .where('name', name)
-      .paginate(page, limit)
       .sort(sort);
+
+    return query;
   }
 
-  async populateAuthor(response) {
-    return Tag.model.populate(response, [
-      {
-        path: 'author',
-        select: 'email name username',
-      },
-    ]);
-  }
-
+  /**
+   * Get all tags with pagination
+   */
   async getAllTags(queryParams = {}) {
-    const response = await this.getBaseQuery(queryParams).execute();
-    return this.populateAuthor(response);
+    return this.getBaseQuery(queryParams).paginate(
+      queryParams.page,
+      queryParams.limit
+    );
   }
 
+  /**
+   * Get all tags without pagination
+   */
+  async getAllTagsWithoutPagination(queryParams = {}) {
+    return this.getBaseQuery(queryParams).get();
+  }
+
+  /**
+   * Get soft deleted tags
+   */
   async getTrashedTags(queryParams = {}) {
-    const response = await this.getBaseQuery(queryParams)
+    return this.getBaseQuery(queryParams)
       .onlyTrashed()
-      .execute();
-    return this.populateAuthor(response);
+      .paginate(queryParams.page, queryParams.limit);
   }
 
+  /**
+   * Create new tag
+   */
   async create(authorId, tagData) {
-    try {
-      const response = await Tag.create({
-        ...tagData,
-        author: authorId,
-      });
-      return this.populateAuthor(response);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const tag = await Tag.create({
+      ...tagData,
+      author: authorId,
+    });
+
+    // Return with populated relations
+    return Tag.with(['author name,email,username']).findById(tag._id);
   }
 
-  async getTagById(id) {
-    try {
-      const response = await Tag.findById(id);
-      if (!response) throw new Error('Tag not found');
-      return this.populateAuthor(response);
-    } catch (error) {
-      throw new Error(error.message);
+  /**
+   * Get tag by ID with relations
+   */
+  async getTagById(id, withRelations = true) {
+    let query = Tag;
+
+    if (withRelations) {
+      query = query.with(['author name,email,username']);
     }
+
+    const tag = await query.findById(id);
+    if (!tag) throw new Error('Tag not found');
+    return tag;
   }
 
+  /**
+   * Update tag by ID
+   */
   async updateTag(id, updateData) {
-    try {
-      const response = await Tag.updateById(id, updateData);
-      if (!response) throw new Error('Tag not found');
-      return this.populateAuthor(response);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const updated = await Tag.updateById(id, updateData);
+    if (!updated) throw new Error('Tag not found');
+
+    // Return with populated relations
+    return Tag.with(['author name,email,username']).findById(id);
   }
 
+  /**
+   * Delete tag by ID
+   */
   async deleteTag(id) {
-    try {
-      await Tag.deleteById(id);
-      return true;
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const deleted = await Tag.deleteById(id);
+    if (!deleted) throw new Error('Tag not found');
+    return true;
   }
 
+  /**
+   * Get tag by slug
+   */
   async getTagBySlug(slug) {
-    try {
-      const response = await Tag.findOne({ slug });
-      if (!response) throw new Error('Tag not found');
-      return this.populateAuthor(response);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const tag = await Tag.with(['author name,email,username'])
+      .where('slug', slug)
+      .findOne();
+
+    if (!tag) throw new Error('Tag not found');
+    return tag;
   }
 
+  /**
+   * Restore soft deleted tag
+   */
   async restoreTag(id) {
-    try {
-      const response = await Tag.restoreById(id);
-      return this.populateAuthor(response);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const restored = await Tag.restoreById(id);
+    if (!restored) throw new Error('Tag not found');
+
+    // Return with populated relations
+    return Tag.with(['author name,email,username']).findById(id);
   }
 
+  /**
+   * Permanently delete tag
+   */
   async forceDeleteTag(id) {
-    try {
-      return await Tag.forceDelete(id);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const deleted = await Tag.forceDelete(id);
+    if (!deleted) throw new Error('Tag not found');
+    return true;
+  }
+
+  /**
+   * Get user's tags
+   */
+  async getUserTags(authorId, queryParams = {}) {
+    return this.getBaseQuery(queryParams)
+      .where('author', authorId)
+      .paginate(queryParams.page, queryParams.limit);
+  }
+
+  /**
+   * Find blogs by tag
+   */
+  async findBlogsByTag(tagId) {
+    const tag = await Tag.findBlogsByTag(tagId);
+    if (!tag) throw new Error('Tag not found');
+    return tag;
   }
 }
 

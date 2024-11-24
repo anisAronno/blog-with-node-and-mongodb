@@ -47,7 +47,6 @@ const TagModel = mongoose.model('Tag', tagSchema);
 class Tag extends BaseModel {
   constructor() {
     super(TagModel);
-    this.defaultPopulates = [{ path: 'author', select: 'email name username' }];
   }
 
   // find blog by tag here tag having multiple blogs

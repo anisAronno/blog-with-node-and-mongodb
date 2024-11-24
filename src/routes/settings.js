@@ -1,10 +1,6 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
-
-// Import Controllers
 const SettingsController = require('../controllers/SettingsController');
-
-// Import Validators
 const {
   processedErrorResponse,
 } = require('../validation/processedErrorResponse');
@@ -13,75 +9,93 @@ const {
   validateUpdateSettings,
 } = require('../validation/settingsRequestValidator');
 
-// Settings routes - prefix: /api/v1/settings
-const SETTINGS_ROUTES = {
-  LIST: '', // GET    /api/v1/settings
-  CREATE: '', // POST   /api/v1/settings
-  GET: '/:key', // GET    /api/v1/settings/:key
-  UPDATE: '/:key', // PUT    /api/v1/settings/:key
-  DELETE: '/:key', // DELETE /api/v1/settings/:key
-
-  // Additional settings-specific routes
-  PUBLIC_LIST: '/public', // GET    /api/v1/settings/public
-  PUBLIC_GET: '/public/:key', // GET    /api/v1/settings/public/:key
-  PRIVATE_LIST: '/private', // GET    /api/v1/settings/private
-  PRIVATE_GET: '/private/:key', // GET    /api/v1/settings/private/:key
+// Permission Constants
+const SETTINGS_PERMISSIONS = {
+  VIEW: 'view_settings',
+  CREATE: 'create_settings',
+  EDIT: 'edit_settings',
+  DELETE: 'delete_settings',
 };
-/**
- * Settings Routes
- */
+
+// Settings routes
+const SETTINGS_ROUTES = {
+  LIST: '',
+  CREATE: '',
+  GET: '/:key',
+  UPDATE: '/:key',
+  DELETE: '/:key',
+  PUBLIC_LIST: '/public',
+  PUBLIC_GET: '/public/:key',
+  PRIVATE_LIST: '/private',
+  PRIVATE_GET: '/private/:key',
+};
+
+// Management routes configuration
+const managementRoutes = [
+  {
+    method: 'get',
+    path: SETTINGS_ROUTES.LIST,
+    handler: SettingsController.getAllSettings,
+    permissions: [SETTINGS_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'post',
+    path: SETTINGS_ROUTES.CREATE,
+    handler: SettingsController.createSetting,
+    middleware: [validateCreateSettings, processedErrorResponse],
+    permissions: [SETTINGS_PERMISSIONS.CREATE],
+  },
+  {
+    method: 'put',
+    path: SETTINGS_ROUTES.UPDATE,
+    handler: SettingsController.updateSetting,
+    middleware: [validateUpdateSettings, processedErrorResponse],
+    permissions: [SETTINGS_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'delete',
+    path: SETTINGS_ROUTES.DELETE,
+    handler: SettingsController.deleteSetting,
+    permissions: [SETTINGS_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'get',
+    path: SETTINGS_ROUTES.PRIVATE_LIST,
+    handler: SettingsController.getPrivateSettings,
+    permissions: [SETTINGS_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'get',
+    path: SETTINGS_ROUTES.PRIVATE_GET,
+    handler: SettingsController.getPrivateSettingByKey,
+    permissions: [SETTINGS_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'get',
+    path: SETTINGS_ROUTES.GET,
+    handler: SettingsController.getSettingByKey,
+    permissions: [SETTINGS_PERMISSIONS.VIEW],
+  },
+];
+
+// Dynamic route registration with authentication and permission checks
+managementRoutes.forEach((route) => {
+  const middlewares = [
+    AuthMiddleware.authenticate,
+    ...(route.permissions.length > 0
+      ? [AuthMiddleware.hasPermission(...route.permissions)]
+      : []),
+    ...(route.middleware || []),
+  ];
+
+  router[route.method](route.path, ...middlewares, route.handler);
+});
+
+// Public routes
 router.get(SETTINGS_ROUTES.PUBLIC_LIST, SettingsController.getPublicSettings);
 router.get(
   SETTINGS_ROUTES.PUBLIC_GET,
   SettingsController.getPublicSettingByKey
-);
-router.get(
-  SETTINGS_ROUTES.LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  SettingsController.getAllSettings
-);
-
-router.post(
-  SETTINGS_ROUTES.CREATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  validateCreateSettings,
-  processedErrorResponse,
-  SettingsController.createSetting
-);
-router.put(
-  SETTINGS_ROUTES.UPDATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  validateUpdateSettings,
-  processedErrorResponse,
-  SettingsController.updateSetting
-);
-router.delete(
-  SETTINGS_ROUTES.DELETE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin']),
-  SettingsController.deleteSetting
-);
-router.get(
-  SETTINGS_ROUTES.PRIVATE_LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  SettingsController.getPrivateSettings
-);
-router.get(
-  SETTINGS_ROUTES.PRIVATE_GET,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  SettingsController.getPrivateSettingByKey
-);
-
-router.get(
-  SETTINGS_ROUTES.GET,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  SettingsController.getSettingByKey
 );
 
 module.exports = router;

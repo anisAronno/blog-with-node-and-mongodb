@@ -1,16 +1,24 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
 
-// Contact routes - prefix: /api/v1/settings
+// Permission Constants
+const CONTACT_PERMISSIONS = {
+  VIEW: 'view_contact',
+  CREATE: 'create_contact',
+  EDIT: 'edit_contact',
+  DELETE: 'delete_contact',
+};
+
+// Contact routes
 const CONTACT_ROUTES = {
-  LIST: '', // GET    /api/v1/contacts
-  CREATE: '', // POST   /api/v1/contacts
-  GET: '/:id', // GET    /api/v1/contacts/:id
-  UPDATE: '/:id', // PUT    /api/v1/contacts/:id
-  DELETE: '/:id', // DELETE /api/v1/contacts/:id
-  RESTORE: '/:id/restore', // POST   /api/v1/contacts/:id/restore
-  REMOVE: '/:id/permanent', // DELETE /api/v1/contacts/:id/permanent
-  TRASH_LIST: '/trash', // GET    /api/v1/contacts/trash
+  LIST: '',
+  CREATE: '',
+  GET: '/:id',
+  UPDATE: '/:id',
+  DELETE: '/:id',
+  RESTORE: '/:id/restore',
+  REMOVE: '/:id/permanent',
+  TRASH_LIST: '/trash',
 };
 
 // Import Validators
@@ -25,61 +33,73 @@ const {
 // Import Controllers
 const ContactController = require('../controllers/ContactController');
 
-/**
- * Contact Routes
- */
+// Management routes configuration
+const managementRoutes = [
+  {
+    method: 'get',
+    path: CONTACT_ROUTES.LIST,
+    handler: ContactController.getAllContacts,
+    permissions: [CONTACT_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'post',
+    path: CONTACT_ROUTES.CREATE,
+    handler: ContactController.createContact,
+    middleware: [createContactValidator, processedErrorResponse],
+    permissions: [],
+  },
+  {
+    method: 'put',
+    path: CONTACT_ROUTES.UPDATE,
+    handler: ContactController.updateContact,
+    middleware: [updateContactValidator, processedErrorResponse],
+    permissions: [CONTACT_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'delete',
+    path: CONTACT_ROUTES.DELETE,
+    handler: ContactController.deleteContact,
+    permissions: [CONTACT_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: CONTACT_ROUTES.RESTORE,
+    handler: ContactController.restoreContact,
+    permissions: [CONTACT_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'delete',
+    path: CONTACT_ROUTES.REMOVE,
+    handler: ContactController.removeContact,
+    permissions: [CONTACT_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'get',
+    path: CONTACT_ROUTES.TRASH_LIST,
+    handler: ContactController.getTrashedContacts,
+    permissions: [CONTACT_PERMISSIONS.VIEW, CONTACT_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'get',
+    path: CONTACT_ROUTES.GET,
+    handler: ContactController.getContactById,
+    permissions: [CONTACT_PERMISSIONS.VIEW],
+  },
+];
 
-router.get(
-  CONTACT_ROUTES.LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  ContactController.getAllContacts
-);
-router.post(
-  CONTACT_ROUTES.CREATE,
-  createContactValidator,
-  processedErrorResponse,
-  ContactController.createContact
-);
-
-router.put(
-  CONTACT_ROUTES.UPDATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  updateContactValidator,
-  processedErrorResponse,
-  ContactController.updateContact
-);
-router.delete(
-  CONTACT_ROUTES.DELETE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  ContactController.deleteContact
-);
-router.post(
-  CONTACT_ROUTES.RESTORE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  ContactController.restoreContact
-);
-router.delete(
-  CONTACT_ROUTES.REMOVE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin']),
-  ContactController.removeContact
-);
-router.get(
-  CONTACT_ROUTES.TRASH_LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  ContactController.getTrashedContacts
-);
-
-router.get(
-  CONTACT_ROUTES.GET,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  ContactController.getContactById
-);
+// Dynamic route registration with authentication and permission checks
+managementRoutes.forEach((route) => {
+  const middlewares = [
+    ...(route.path !== CONTACT_ROUTES.CREATE
+      ? [AuthMiddleware.authenticate]
+      : []),
+    ...(route.permissions.length > 0
+      ? [AuthMiddleware.hasPermission(...route.permissions)]
+      : []),
+    ...(route.middleware || []),
+  ];
+  
+  router[route.method](route.path, ...middlewares, route.handler);
+});
 
 module.exports = router;

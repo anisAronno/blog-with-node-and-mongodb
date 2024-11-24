@@ -35,11 +35,6 @@ const userValidationRules = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Name must be between 3 and 50 characters'),
-
-  body('role')
-    .optional()
-    .isIn(['user', 'author', 'editor', 'admin', 'superAdmin'])
-    .withMessage('Invalid role specified'),
 ];
 
 // Create user validation
@@ -85,11 +80,6 @@ const validateUpdateUser = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Name must be between 3 and 50 characters'),
-
-  body('role')
-    .optional()
-    .isIn(['user', 'author', 'editor', 'admin', 'superAdmin'])
-    .withMessage('Invalid role specified'),
 ];
 
 module.exports = {

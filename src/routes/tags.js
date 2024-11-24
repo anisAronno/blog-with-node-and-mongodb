@@ -13,63 +13,95 @@ const {
   updateTagValidator,
 } = require('../validation/tagRequestValidator');
 
-// Tag routes - prefix: /api/v1/settings
-const TAG_ROUTES = {
-  LIST: '', // GET    /api/v1/tags
-  CREATE: '', // POST   /api/v1/tags
-  GET: '/:id', // GET    /api/v1/tags/:id
-  UPDATE: '/:id', // PUT    /api/v1/tags/:id
-  DELETE: '/:id', // DELETE /api/v1/tags/:id
-  RESTORE: '/:id/restore', // POST   /api/v1/tags/:id/restore
-  REMOVE: '/:id/permanent', // DELETE /api/v1/tags/:id/permanent
-  TRASH_LIST: '/trash', // GET    /api/v1/tags/trash
-  GET_BY_SLUG: '/slug/:slug', // GET    /api/v1/tags/slug/:slug
+// Permission Constants
+const TAG_PERMISSIONS = {
+  VIEW: 'view_tag',
+  CREATE: 'create_tag',
+  EDIT: 'edit_tag',
+  DELETE: 'delete_tag',
 };
-/**
- * Tag Routes
- */
-router.get(TAG_ROUTES.LIST, TagController.getAllTags);
-router.get(
-  TAG_ROUTES.TRASH_LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  TagController.getTrashedTags
-);
-router.get(TAG_ROUTES.GET, TagController.getTagById);
+
+// Tag routes
+const TAG_ROUTES = {
+  LIST: '',
+  CREATE: '',
+  GET: '/:id',
+  UPDATE: '/:id',
+  DELETE: '/:id',
+  RESTORE: '/:id/restore',
+  REMOVE: '/:id/permanent',
+  TRASH_LIST: '/trash',
+  GET_BY_SLUG: '/slug/:slug',
+};
+
+// Management routes configuration
+const managementRoutes = [
+  {
+    method: 'get',
+    path: TAG_ROUTES.LIST,
+    handler: TagController.getAllTags,
+    permissions: [TAG_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'get',
+    path: TAG_ROUTES.TRASH_LIST,
+    handler: TagController.getTrashedTags,
+    permissions: [TAG_PERMISSIONS.VIEW, TAG_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'get',
+    path: TAG_ROUTES.GET,
+    handler: TagController.getTagById,
+    permissions: [TAG_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'post',
+    path: TAG_ROUTES.CREATE,
+    handler: TagController.createTag,
+    middleware: [createTagValidator, processedErrorResponse],
+    permissions: [TAG_PERMISSIONS.CREATE],
+  },
+  {
+    method: 'put',
+    path: TAG_ROUTES.UPDATE,
+    handler: TagController.updateTag,
+    middleware: [updateTagValidator, processedErrorResponse],
+    permissions: [TAG_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'delete',
+    path: TAG_ROUTES.DELETE,
+    handler: TagController.deleteTag,
+    permissions: [TAG_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: TAG_ROUTES.RESTORE,
+    handler: TagController.restoreTag,
+    permissions: [TAG_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'delete',
+    path: TAG_ROUTES.REMOVE,
+    handler: TagController.removeTag,
+    permissions: [TAG_PERMISSIONS.DELETE],
+  },
+];
+
+// Public routes
 router.get(TAG_ROUTES.GET_BY_SLUG, TagController.getTagBySlug);
-router.post(
-  TAG_ROUTES.CREATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  createTagValidator,
-  processedErrorResponse,
-  TagController.createTag
-);
-router.put(
-  TAG_ROUTES.UPDATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  updateTagValidator,
-  processedErrorResponse,
-  TagController.updateTag
-);
-router.delete(
-  TAG_ROUTES.DELETE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  TagController.deleteTag
-);
-router.post(
-  TAG_ROUTES.RESTORE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  TagController.restoreTag
-);
-router.delete(
-  TAG_ROUTES.REMOVE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin']),
-  TagController.removeTag
-);
+
+// Dynamic route registration with authentication and permission checks
+managementRoutes.forEach((route) => {
+  const middlewares = [
+    AuthMiddleware.authenticate,
+    ...(route.permissions.length > 0
+      ? [AuthMiddleware.hasPermission(...route.permissions)]
+      : []),
+    ...(route.middleware || []),
+  ];
+
+  router[route.method](route.path, ...middlewares, route.handler);
+});
 
 module.exports = router;

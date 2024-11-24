@@ -8,7 +8,8 @@ class AuthController {
 
       res.status(201).json({
         success: true,
-        data: result,
+        message: 'User registered successfully',
+        user: result,
       });
     } catch (error) {
       res.status(400).json({
@@ -27,7 +28,8 @@ class AuthController {
 
       res.status(200).json({
         success: true,
-        data: result,
+        user: result,
+        message: 'Logged in successfully',
       });
     } catch (error) {
       res.status(401).json({
@@ -53,6 +55,7 @@ class AuthController {
 
       res.status(200).json({
         success: true,
+        message: 'Token refreshed successfully',
         tokens,
       });
     } catch (error) {
@@ -66,9 +69,7 @@ class AuthController {
   // Logout
   static async logout(req, res) {
     try {
-      const token = req.headers.authorization.split(' ')[1];
-
-      await AuthService.logout(req.user._id, token);
+      await AuthService.logout(req.user._id);
 
       res.status(200).json({
         success: true,
@@ -95,7 +96,8 @@ class AuthController {
 
       res.status(200).json({
         success: true,
-        data: result,
+        message: 'Password changed successfully',
+        user: result,
       });
     } catch (error) {
       res.status(400).json({
@@ -112,7 +114,7 @@ class AuthController {
 
       res.status(200).json({
         success: true,
-        data: user,
+        user: user,
       });
     } catch (error) {
       res.status(400).json({
@@ -129,7 +131,8 @@ class AuthController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        data: user,
+        message: 'Profile updated successfully',
+        user: user,
       });
     } catch (error) {
       res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({

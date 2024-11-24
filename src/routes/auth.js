@@ -1,12 +1,6 @@
-// Import Express
 const router = require('express').Router();
-
 const AuthMiddleware = require('../middleware/AuthMiddleware');
-
-// Import Controllers
 const AuthController = require('../controllers/AuthController');
-
-// Import Validators
 const {
   processedErrorResponse,
 } = require('../validation/processedErrorResponse');
@@ -15,46 +9,86 @@ const {
   validateUpdateUser,
 } = require('../validation/userRequestValidator');
 
-/**
- * Authentication Routes
- * No prefix - these are top-level auth routes
- */
-router.post('/login', AuthController.login);
+// Permission Constants
+const AUTH_PERMISSIONS = {
+  LOGIN: 'login',
+  REGISTER: 'register',
+  PROFILE_VIEW: 'view_profile',
+  PROFILE_UPDATE: 'update_profile',
+  PASSWORD_CHANGE: 'change_password',
+};
 
-router.post(
-  '/register',
-  validateCreateUser,
-  processedErrorResponse,
-  AuthController.register
-);
+// Authentication routes configuration
+const authRoutes = [
+  {
+    method: 'post',
+    path: '/login',
+    handler: AuthController.login,
+    permissions: [],
+  },
+  {
+    method: 'post',
+    path: '/register',
+    handler: AuthController.register,
+    middleware: [validateCreateUser, processedErrorResponse],
+    permissions: [],
+  },
+  {
+    method: 'post',
+    path: '/logout',
+    handler: AuthController.logout,
+    permissions: [],
+  },
+  {
+    method: 'post',
+    path: '/refresh-token',
+    handler: AuthController.refreshToken,
+    permissions: [],
+  },
+  {
+    method: 'post',
+    path: '/change-password',
+    handler: AuthController.changePassword,
+    middleware: [validateUpdateUser, processedErrorResponse],
+    permissions: [AUTH_PERMISSIONS.PASSWORD_CHANGE],
+  },
+  {
+    method: 'get',
+    path: '/me',
+    handler: AuthController.getProfile,
+    permissions: [AUTH_PERMISSIONS.PROFILE_VIEW],
+  },
+  {
+    method: 'put',
+    path: '/me',
+    handler: AuthController.updateProfile,
+    middleware: [validateUpdateUser, processedErrorResponse],
+    permissions: [AUTH_PERMISSIONS.PROFILE_UPDATE],
+  },
+  {
+    method: 'put',
+    path: '/me/password',
+    handler: AuthController.changePassword,
+    middleware: [validateUpdateUser, processedErrorResponse],
+    permissions: [AUTH_PERMISSIONS.PASSWORD_CHANGE],
+  },
+];
 
-router.post('/logout', AuthMiddleware.authenticate, AuthController.logout);
+// Dynamic route registration with authentication and permission checks
+authRoutes.forEach((route) => {
+  const middlewares = [
+    ...(route.path !== '/login' &&
+    route.path !== '/register' &&
+    route.path !== '/refresh-token'
+      ? [AuthMiddleware.authenticate]
+      : []),
+    ...(route.permissions.length > 0
+      ? [AuthMiddleware.hasPermission(...route.permissions)]
+      : []),
+    ...(route.middleware || []),
+  ];
 
-router.post('/refresh-token', AuthController.refreshToken);
+  router[route.method](route.path, ...middlewares, route.handler);
+});
 
-router.post(
-  '/change-password',
-  AuthMiddleware.authenticate,
-  validateUpdateUser,
-  processedErrorResponse,
-  AuthController.changePassword
-);
-
-router.get('/me', AuthMiddleware.authenticate, AuthController.getProfile);
-
-router.put(
-  '/me',
-  AuthMiddleware.authenticate,
-  validateUpdateUser,
-  processedErrorResponse,
-  AuthController.updateProfile
-);
-
-router.put(
-  '/me/password',
-  AuthMiddleware.authenticate,
-  validateUpdateUser,
-  processedErrorResponse,
-  AuthController.changePassword
-);
 module.exports = router;

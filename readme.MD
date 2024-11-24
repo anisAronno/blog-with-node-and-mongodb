@@ -166,8 +166,8 @@ git clone https://github.com/anisAronno/blog-with-node-and-mongodb.git
 
 ### Contacts
 
-| Method | Endpoint                         | Description                |
-| ------ | -------------------------------- | -------------------------- |
+| Method | Endpoint                        | Description                |
+| ------ | ------------------------------- | -------------------------- |
 | GET    | `/api/v1/contact`               | List all contacts          |
 | POST   | `/api/v1/contact`               | Create a contact           |
 | GET    | `/api/v1/contact/:id`           | Get contact details by ID  |

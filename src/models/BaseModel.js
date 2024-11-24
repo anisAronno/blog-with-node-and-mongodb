@@ -1,17 +1,10 @@
 class BaseModel {
   constructor(model) {
     this.model = model;
-    this.resetQuery();
     this.hasSoftDelete = !!this.model.schema.paths.deleted_at;
     this.defaultExcludedFields = ['password', 'tokens'];
     this.defaultPopulates = [];
-    this.initializeSoftDelete();
-  }
-
-  initializeSoftDelete() {
-    if (this.hasSoftDelete) {
-      this.query.conditions.deleted_at = null;
-    }
+    this.resetQuery();
   }
 
   resetQuery() {
@@ -23,25 +16,39 @@ class BaseModel {
       },
       includeTrashed: false,
       page: 1,
+      limit: 10,
       populates: [],
     };
-    return this;
-  }
 
-  setDefaultPopulates(populates) {
-    this.defaultPopulates = populates;
-    return this;
-  }
-
-  with(relations) {
-    if (Array.isArray(relations)) {
-      this.query.populates = [...this.query.populates, ...relations];
-    } else {
-      this.query.populates.push(relations);
+    if (this.hasSoftDelete) {
+      this.query.conditions.deleted_at = null;
     }
+
     return this;
   }
 
+  // Modified with() method to handle Laravel-style relation strings
+  with(relations) {
+    if (!Array.isArray(relations)) {
+      relations = [relations];
+    }
+
+    this.query.populates = relations.map((relation) => {
+      if (typeof relation === 'string') {
+        // Parse string like "categories name, description"
+        const [path, select] = relation.split(' ');
+        return {
+          path,
+          select: select ? select.replace(/,/g, ' ').trim() : undefined,
+        };
+      }
+      return relation;
+    });
+
+    return this;
+  }
+
+  // Keep existing query builder methods
   buildQuery(field, value) {
     if (value !== undefined && value !== '' && value !== null) {
       this.query.conditions[field] = value;
@@ -59,19 +66,11 @@ class BaseModel {
   }
 
   search(term, fields = []) {
-    if (term && term.length > 0) {
-      const searchConditions = fields.map((field) => ({
+    if (term?.length > 0) {
+      this.query.conditions.$or = fields.map((field) => ({
         [field]: { $regex: new RegExp(term, 'i') },
       }));
-      this.query.conditions.$or = searchConditions;
     }
-    return this;
-  }
-
-  paginate(page = 1, limit = 10) {
-    this.query.options.skip = (page - 1) * limit;
-    this.query.options.limit = parseInt(limit);
-    this.query.page = parseInt(page);
     return this;
   }
 
@@ -80,6 +79,85 @@ class BaseModel {
     return this;
   }
 
+  // Modified paginate to return results directly (Laravel-style)
+  async paginate(page = 1, limit = 10) {
+    const parsedPage = parseInt(page);
+    const parsedLimit = parseInt(limit);
+    this.query.options.skip = (parsedPage - 1) * parsedLimit;
+    this.query.options.limit = parsedLimit;
+    this.query.page = parsedPage;
+    this.query.limit = parsedLimit;
+
+    const finalConditions = { ...this.query.conditions };
+
+    try {
+      const [data, total] = await Promise.all([
+        this.model.find(
+          finalConditions,
+          this.query.options.select,
+          this.query.options
+        ),
+        this.model.countDocuments(finalConditions),
+      ]);
+
+      const populatedData = await this.executeWithPopulate(data);
+
+      return {
+        data: populatedData,
+        total,
+        pagination: {
+          page: parsedPage,
+          limit: parsedLimit,
+          totalPages: Math.ceil(total / parsedLimit),
+        },
+      };
+    } catch (error) {
+      throw new Error(`Pagination failed: ${error.message}`);
+    }
+  }
+
+  // New get() method (Laravel-style)
+  async get() {
+    const finalConditions = { ...this.query.conditions };
+
+    try {
+      const data = await this.model.find(
+        finalConditions,
+        this.query.options.select,
+        this.query.options
+      );
+
+      return this.executeWithPopulate(data);
+    } catch (error) {
+      throw new Error(`Query execution failed: ${error.message}`);
+    }
+  }
+
+  // Modified findById to handle relations consistently
+  async findById(id) {
+    const conditions = { _id: id, ...this.query.conditions };
+    return this.executeQuery(() =>
+      this.model.findOne(conditions, this.query.options.select)
+    );
+  }
+
+  // Keep other existing methods (findOne, update, delete, etc.)
+  async executeWithPopulate(result) {
+    if (!result) return null;
+
+    if (this.query.populates.length > 0) {
+      return await this.model.populate(result, this.query.populates);
+    }
+    return result;
+  }
+
+  // Base query builder methods
+  setDefaultPopulates(populates) {
+    this.defaultPopulates = populates;
+    return this;
+  }
+
+  // Advanced query builders
   filter(filters) {
     Object.entries(filters).forEach(([key, value]) => {
       this.buildQuery(key, value);
@@ -97,6 +175,7 @@ class BaseModel {
     return this;
   }
 
+  // Soft delete query modifiers
   withTrashed() {
     if (this.hasSoftDelete) {
       delete this.query.conditions.deleted_at;
@@ -113,150 +192,159 @@ class BaseModel {
     return this;
   }
 
-  async executeWithPopulate(result) {
-    const populates = [...this.defaultPopulates, ...this.query.populates];
-    return populates.length > 0
-      ? await this.model.populate(result, populates)
-      : result;
-  }
-
-  async execute() {
+  async executeQuery(queryFunction) {
     try {
-      if (this.hasSoftDelete && !this.query.includeTrashed) {
-        this.query.conditions.deleted_at = null;
-      }
-
-      const [data, total] = await Promise.all([
-        this.model.find(
-          this.query.conditions,
-          this.query.options.select,
-          this.query.options
-        ),
-        this.model.countDocuments(this.query.conditions),
-      ]);
-
-      const populatedData = await this.executeWithPopulate(data);
-
-      return {
-        data: populatedData,
-        total,
-        pagination: {
-          page: this.query.page,
-          limit: this.query.options.limit,
-          totalPages: Math.ceil(total / this.query.options.limit),
-        },
-      };
+      const result = await queryFunction();
+      return this.executeWithPopulate(result);
     } catch (error) {
-      throw new Error(`Execute operation failed: ${error.message}`);
+      throw new Error(`Query execution failed: ${error.message}`);
     }
   }
 
+  // Enhanced find methods with consistent population
+  async findOne(conditions = {}) {
+    const finalConditions = {
+      ...this.query.conditions,
+      ...conditions,
+    };
+
+    return this.executeQuery(() =>
+      this.model.findOne(finalConditions, this.query.options.select)
+    );
+  }
+
+  // Enhanced create/update methods with population
   async create(data) {
-    try {
-      const result = await this.model.create(data);
-      return this.executeWithPopulate(result);
-    } catch (error) {
-      throw new Error(`Create operation failed: ${error.message}`);
-    }
+    return this.executeQuery(() => this.model.create(data));
   }
 
-  async findById(id) {
-    try {
-      const query =
-        this.hasSoftDelete && !this.query.includeTrashed
-          ? { _id: id, deleted_at: null }
-          : { _id: id };
-      const result = await this.model.findOne(query, this.query.options.select);
-      return this.executeWithPopulate(result);
-    } catch (error) {
-      throw new Error(`Find by ID operation failed: ${error.message}`);
-    }
-  }
-
-  async findOne(query = {}) {
-    try {
-      if (this.hasSoftDelete && !this.query.includeTrashed) {
-        query.deleted_at = null;
-      }
-      const result = await this.model.findOne(query, this.query.options.select);
-      return this.executeWithPopulate(result);
-    } catch (error) {
-      throw new Error(`Find one operation failed: ${error.message}`);
-    }
+  async createMany(dataArray) {
+    return this.executeQuery(() => this.model.insertMany(dataArray));
   }
 
   async updateById(id, updateData) {
-    try {
-      const query = this.hasSoftDelete
-        ? { _id: id, deleted_at: null }
-        : { _id: id };
-      const result = await this.model.findOneAndUpdate(query, updateData, {
+    const conditions = { _id: id, ...this.query.conditions };
+    return this.executeQuery(() =>
+      this.model.findOneAndUpdate(conditions, updateData, {
         new: true,
         select: this.query.options.select,
-      });
-      return this.executeWithPopulate(result);
-    } catch (error) {
-      throw new Error(`Update operation failed: ${error.message}`);
-    }
+      })
+    );
   }
 
+  async updateMany(conditions, updateData) {
+    const finalConditions = {
+      ...this.query.conditions,
+      ...conditions,
+    };
+    return this.executeQuery(() =>
+      this.model.updateMany(finalConditions, updateData)
+    );
+  }
+
+  // Enhanced delete methods
   async deleteById(id) {
-    try {
-      if (this.hasSoftDelete) {
-        const document = await this.findOne({ _id: id, deleted_at: null });
-        if (!document) throw new Error('Not found');
-        const result = await this.model.findByIdAndUpdate(
-          id,
-          { deleted_at: new Date() },
-          { new: true }
-        );
-        return this.executeWithPopulate(result);
-      }
-      return this.model.findByIdAndDelete(id);
-    } catch (error) {
-      throw new Error(`Delete operation failed: ${error.message}`);
+    if (this.hasSoftDelete) {
+      return this.updateById(id, { deleted_at: new Date() });
     }
+    return this.executeQuery(() => this.model.findByIdAndDelete(id));
   }
 
+  async deleteMany(conditions = {}) {
+    const finalConditions = {
+      ...this.query.conditions,
+      ...conditions,
+    };
+
+    if (this.hasSoftDelete) {
+      return this.executeQuery(() =>
+        this.model.updateMany(finalConditions, { deleted_at: new Date() })
+      );
+    }
+    return this.executeQuery(() => this.model.deleteMany(finalConditions));
+  }
+
+  // Soft delete specific methods
   async restoreById(id) {
-    try {
-      if (!this.hasSoftDelete) {
-        throw new Error(
-          'Restore is only available for models with soft delete'
-        );
-      }
-      const document = await this.model.findOne({
-        _id: id,
-        deleted_at: { $ne: null },
-      });
-      if (!document) throw new Error('Not found');
-      const result = await this.model.findByIdAndUpdate(
-        id,
+    if (!this.hasSoftDelete) {
+      throw new Error('Restore is only available for models with soft delete');
+    }
+
+    const conditions = {
+      _id: id,
+      deleted_at: { $ne: null },
+    };
+
+    return this.executeQuery(() =>
+      this.model.findOneAndUpdate(
+        conditions,
         { deleted_at: null },
         { new: true }
-      );
-      return this.executeWithPopulate(result);
-    } catch (error) {
-      throw new Error(`Restore operation failed: ${error.message}`);
+      )
+    );
+  }
+
+  async restoreMany(conditions = {}) {
+    if (!this.hasSoftDelete) {
+      throw new Error('Restore is only available for models with soft delete');
     }
+
+    const finalConditions = {
+      ...conditions,
+      deleted_at: { $ne: null },
+    };
+
+    return this.executeQuery(() =>
+      this.model.updateMany(finalConditions, { deleted_at: null })
+    );
   }
 
   async forceDelete(id) {
-    try {
-      if (!this.hasSoftDelete) {
-        throw new Error(
-          'Force delete is only available for models with soft delete'
-        );
-      }
-      const document = await this.model.findOne({
-        _id: id,
-        deleted_at: { $ne: null },
-      });
-      if (!document) throw new Error('Not found');
-      return this.model.findByIdAndDelete(id);
-    } catch (error) {
-      throw new Error(`Force delete operation failed: ${error.message}`);
+    if (!this.hasSoftDelete) {
+      throw new Error(
+        'Force delete is only available for models with soft delete'
+      );
     }
+
+    const conditions = {
+      _id: id,
+      deleted_at: { $ne: null },
+    };
+
+    return this.executeQuery(() => this.model.findOneAndDelete(conditions));
+  }
+
+  // Aggregation methods
+  async aggregate(pipeline) {
+    return this.executeQuery(async () => {
+      if (this.hasSoftDelete && !this.query.includeTrashed) {
+        pipeline.unshift({ $match: { deleted_at: null } });
+      }
+      return this.model.aggregate(pipeline);
+    });
+  }
+
+  // Utility methods
+  async exists(conditions) {
+    const finalConditions = {
+      ...conditions,
+      ...(this.hasSoftDelete && !this.query.includeTrashed
+        ? { deleted_at: null }
+        : {}),
+    };
+
+    return this.executeQuery(() => this.model.exists(finalConditions));
+  }
+
+  async count(conditions = {}) {
+    const finalConditions = {
+      ...conditions,
+      ...(this.hasSoftDelete && !this.query.includeTrashed
+        ? { deleted_at: null }
+        : {}),
+    };
+
+    return this.executeQuery(() => this.model.countDocuments(finalConditions));
   }
 }
 

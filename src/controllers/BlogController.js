@@ -80,6 +80,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.CREATED).json({
         success: true,
+        message: 'Blog created successfully',
         blog: BlogTransformer.transformBlog(blog),
       });
     } catch (error) {
@@ -120,6 +121,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
+        message: 'Blog updated successfully',
         blog: BlogTransformer.transformBlog(updatedBlog),
       });
     } catch (error) {
