@@ -1,5 +1,6 @@
 const AuthService = require('../services/AuthService');
 const BaseHelper = require('../utils/BaseHelper');
+const User = require('../models/User');
 
 class AuthMiddleware {
   // Validate API key middleware (optional)
@@ -28,7 +29,13 @@ class AuthMiddleware {
       const token = authHeader.split(' ')[1];
       const { user, decoded } = await AuthService.verifyToken(token, 'access');
 
-      req.user = user;
+      // Populate user roles and permissions in a single query
+      const populatedUser = await User.model.findById(user._id).populate({
+        path: 'roles',
+        populate: { path: 'permissions', select: 'name' },
+      });
+
+      req.user = populatedUser;
       req.tokenPayload = decoded;
 
       next();
@@ -41,35 +48,41 @@ class AuthMiddleware {
     }
   }
 
-  // Role-based authorization middleware
-  static authorize(roles = [], model = '') {
-    return async (req, res, next) => {
-      // Check if user is authenticated
-      if (!req.user) {
-        return this.#sendUnauthorizedResponse(res);
-      }
+  // Cached method to check user permissions
+  static async checkUserPermissions(user, requiredPermission) {
+    // SuperAdmin has full access
+    if (user.role === 'superAdmin') {
+      return true;
+    }
 
-      // Superadmin has full access
-      if (req.user.role === 'superAdmin') {
-        return next();
-      }
-
-      // Check model-specific authorization
-      if (model && req.params.id) {
-        return this.checkModelSpecificPermissions(req, res, next, model);
-      }
-
-      // Check role-based permissions
-      return this.checkRolePermissions(req, res, next, roles);
-    };
+    // Check if user has the required permission
+    return user.roles.some((role) =>
+      role.permissions.some((perm) => perm.name === requiredPermission)
+    );
   }
 
-  // Helper method to send unauthorized response
-  static #sendUnauthorizedResponse(res) {
-    return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).json({
-      success: false,
-      message: 'Authentication required',
-    });
+  // Middleware to check if the user has a specific permission
+  static hasPermission(permission) {
+    return async (req, res, next) => {
+      try {
+        const hasPermission = await AuthMiddleware.checkUserPermissions(req.user, permission);
+
+        if (!hasPermission) {
+          return res.status(HTTP_STATUS_CODE.FORBIDDEN).json({
+            success: false,
+            message: 'Insufficient permissions',
+          });
+        }
+
+        return next();
+      } catch (error) {
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+          success: false,
+          message: 'Error checking permissions',
+          error: error.message,
+        });
+      }
+    };
   }
 
   // Check model-specific permissions
@@ -87,8 +100,10 @@ class AuthMiddleware {
         });
       }
 
-      // Check if user is the author
-      if (data.author.equals(req.user._id)) {
+      // Check model-specific permissions with a more generic approach
+      const hasPermission = await AuthMiddleware.checkModelPermission(req.user, model, data);
+
+      if (hasPermission) {
         req[`${modelName}`] = data;
         return next();
       }
@@ -106,16 +121,28 @@ class AuthMiddleware {
     }
   }
 
-  // Check role-based permissions
-  static checkRolePermissions(req, res, next, roles) {
-    if (roles.length && !roles.includes(req.user.role)) {
-      return res.status(HTTP_STATUS_CODE.FORBIDDEN).json({
-        success: false,
-        message: 'Insufficient permissions',
-      });
+  // Improved model permission check
+  static async checkModelPermission(user, model, data) {
+    // SuperAdmin always has access
+    if (user.role === 'superAdmin') {
+      return true;
     }
 
-    return next();
+    // Generic permission checks
+    const permissionMappings = {
+      edit: data.author && data.author.equals(user._id),
+      delete: data.author && data.author.equals(user._id),
+    };
+
+    // Check if user has required model-specific permissions
+    return user.roles.some((role) =>
+      role.permissions.some(
+        (perm) =>
+          permissionMappings[perm.name] ||
+          perm.name === `${model}_edit` ||
+          perm.name === `${model}_delete`
+      )
+    );
   }
 }
 

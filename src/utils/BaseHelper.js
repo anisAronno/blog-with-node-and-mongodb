@@ -26,8 +26,7 @@ class BaseHelper {
    */
   static strRandom(length = 20, type = 'alphanumeric') {
     const charSets = {
-      alphanumeric:
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+      alphanumeric: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
       numeric: '0123456789',
       alpha: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
     };
@@ -63,6 +62,26 @@ class BaseHelper {
         `${Object.keys(query).length > 0 ? Object.keys(query)[0] : ''} already exists`
       );
     }
+    return true;
+  }
+
+  /**
+   *
+   * @param {BaseModel} modelName
+   * @param {string} title
+   * @param {?string} currentId
+   * @returns {Promise<boolean>}
+   */
+  static async isNotExists(modelName, query, currentId = null) {
+    if (currentId) {
+      query._id = { $ne: currentId };
+    }
+    const model = await modelName.findOne(query);
+
+    if (!model) {
+      throw new Error(`${Object.keys(query).length > 0 ? Object.keys(query)[0] : ''} not found`);
+    }
+
     return true;
   }
 }

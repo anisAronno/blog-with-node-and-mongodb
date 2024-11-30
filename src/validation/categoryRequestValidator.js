@@ -8,9 +8,7 @@ const categoryValidationRules = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Category name must be between 3 and 50 characters')
-    .custom(
-      async (name) => await BaseHelper.isExists(Category, { name: name })
-    ),
+    .custom(async (name) => await BaseHelper.isExists(Category, { name: name })),
 
   body('description')
     .optional()
@@ -30,8 +28,7 @@ const updateCategoryValidator = [
     .isLength({ min: 3, max: 50 })
     .withMessage('Category name must be between 3 and 50 characters')
     .custom(
-      async (name, { req }) =>
-        await BaseHelper.isExists(Category, { name: name }, req.params.id)
+      async (name, { req }) => await BaseHelper.isExists(Category, { name: name }, req.params.id)
     ),
 
   body('description')

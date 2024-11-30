@@ -25,10 +25,7 @@ const contactValidationRules = [
     .isLength({ min: 2, max: 200 })
     .withMessage('Subject must be between 2 and 200 characters'),
 
-  body('message')
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage('Message is required'),
+  body('message').trim().isLength({ min: 1 }).withMessage('Message is required'),
 ];
 
 // Create contact validation
@@ -42,11 +39,7 @@ const updateContactValidator = [
     .isLength({ min: 2, max: 100 })
     .withMessage('Name must be between 2 and 100 characters'),
 
-  body('email')
-    .optional()
-    .trim()
-    .isEmail()
-    .withMessage('Invalid email address'),
+  body('email').optional().trim().isEmail().withMessage('Invalid email address'),
 
   body('phone')
     .optional()
@@ -60,11 +53,7 @@ const updateContactValidator = [
     .isLength({ min: 2, max: 200 })
     .withMessage('Subject must be between 2 and 200 characters'),
 
-  body('message')
-    .optional()
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage('Message is required'),
+  body('message').optional().trim().isLength({ min: 1 }).withMessage('Message is required'),
 ];
 
 module.exports = {

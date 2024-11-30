@@ -10,105 +10,131 @@ const {
 } = require('../validation/categoryRequestValidator');
 
 // Import Validators
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
 
-// Category routes - prefix: /api/v1/settings
-const CATEGORY_ROUTES = {
-  LIST: '', // GET    /api/v1/categories
-  CREATE: '', // POST   /api/v1/categories
-  GET: '/:id', // GET    /api/v1/categories/:id
-  UPDATE: '/:id', // PUT    /api/v1/categories/:id
-  DELETE: '/:id', // DELETE /api/v1/categories/:id
-  RESTORE: '/:id/restore', // POST   /api/v1/categories/:id/restore
-  REMOVE: '/:id/permanent', // DELETE /api/v1/categories/:id/permanent
-  TRASH_LIST: '/trash', // GET    /api/v1/categories/trash
-  GET_BY_SLUG: '/slug/:slug', // GET    /api/v1/categories/slug/:slug
-  ROOT_CATEGORIES: '/root/all', // GET    /api/v1/categories/root/all
-  HIERARCHY: '/:id/hierarchy', // GET    /api/v1/categories/:id/hierarchy
-  SUBCATEGORIES: '/:id/subcategories', // GET    /api/v1/categories/:id/subcategories
-  CREATE_SUBCATEGORY: '/:parentId/subcategory', // POST   /api/v1/categories/:parentId/subcategory
-  MOVE: '/:id/move', // PATCH  /api/v1/categories/:id/move
+// Permission Constants
+const CATEGORY_PERMISSIONS = {
+  VIEW: 'view_category',
+  CREATE: 'create_category',
+  EDIT: 'edit_category',
+  DELETE: 'delete_category',
 };
-/**
- * Category Routes
- */
-router.get(CATEGORY_ROUTES.LIST, CategoryController.getAllCategories);
-router.post(
-  CATEGORY_ROUTES.CREATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  createCategoryValidator,
-  processedErrorResponse,
-  CategoryController.createCategory
-);
-router.put(
-  CATEGORY_ROUTES.UPDATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  updateCategoryValidator,
-  processedErrorResponse,
-  CategoryController.updateCategory
-);
-router.delete(
-  CATEGORY_ROUTES.DELETE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.deleteCategory
-);
-router.post(
-  CATEGORY_ROUTES.RESTORE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.restoreCategory
-);
-router.delete(
-  CATEGORY_ROUTES.REMOVE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin']),
-  CategoryController.removeCategory
-);
-router.get(
-  CATEGORY_ROUTES.TRASH_LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.getTrashedCategories
-);
 
-router.get(
-  CATEGORY_ROUTES.ROOT_CATEGORIES,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.getRootCategories
-);
-router.get(
-  CATEGORY_ROUTES.HIERARCHY,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.getCategoryHierarchy
-);
-router.get(
-  CATEGORY_ROUTES.SUBCATEGORIES,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.getSubcategories
-);
-router.post(
-  CATEGORY_ROUTES.CREATE_SUBCATEGORY,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  createCategoryValidator,
-  processedErrorResponse,
-  CategoryController.createSubcategory
-);
-router.patch(
-  CATEGORY_ROUTES.MOVE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'category']),
-  CategoryController.moveCategory
-);
+// Category routes
+const CATEGORY_ROUTES = {
+  LIST: '',
+  CREATE: '',
+  GET: '/:id',
+  UPDATE: '/:id',
+  DELETE: '/:id',
+  RESTORE: '/:id/restore',
+  REMOVE: '/:id/permanent',
+  TRASH_LIST: '/trash',
+  GET_BY_SLUG: '/slug/:slug',
+  ROOT_CATEGORIES: '/root/all',
+  HIERARCHY: '/:id/hierarchy',
+  SUBCATEGORIES: '/:id/subcategories',
+  CREATE_SUBCATEGORY: '/:parentId/subcategory',
+  MOVE: '/:id/move',
+};
 
-router.get(CATEGORY_ROUTES.GET, CategoryController.getCategoryById);
+// Management routes configuration
+const managementRoutes = [
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.LIST,
+    handler: CategoryController.getAllCategories,
+    permissions: [CATEGORY_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'post',
+    path: CATEGORY_ROUTES.CREATE,
+    handler: CategoryController.createCategory,
+    middleware: [createCategoryValidator, processedErrorResponse],
+    permissions: [CATEGORY_PERMISSIONS.CREATE],
+  },
+  {
+    method: 'put',
+    path: CATEGORY_ROUTES.UPDATE,
+    handler: CategoryController.updateCategory,
+    middleware: [updateCategoryValidator, processedErrorResponse],
+    permissions: [CATEGORY_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'delete',
+    path: CATEGORY_ROUTES.DELETE,
+    handler: CategoryController.deleteCategory,
+    permissions: [CATEGORY_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: CATEGORY_ROUTES.RESTORE,
+    handler: CategoryController.restoreCategory,
+    permissions: [CATEGORY_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'delete',
+    path: CATEGORY_ROUTES.REMOVE,
+    handler: CategoryController.removeCategory,
+    permissions: [CATEGORY_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.TRASH_LIST,
+    handler: CategoryController.getTrashedCategories,
+    permissions: [CATEGORY_PERMISSIONS.VIEW, CATEGORY_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.ROOT_CATEGORIES,
+    handler: CategoryController.getRootCategories,
+    permissions: [CATEGORY_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.HIERARCHY,
+    handler: CategoryController.getCategoryHierarchy,
+    permissions: [CATEGORY_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.SUBCATEGORIES,
+    handler: CategoryController.getSubcategories,
+    permissions: [CATEGORY_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'post',
+    path: CATEGORY_ROUTES.CREATE_SUBCATEGORY,
+    handler: CategoryController.createSubcategory,
+    middleware: [createCategoryValidator, processedErrorResponse],
+    permissions: [CATEGORY_PERMISSIONS.CREATE],
+  },
+  {
+    method: 'patch',
+    path: CATEGORY_ROUTES.MOVE,
+    handler: CategoryController.moveCategory,
+    permissions: [CATEGORY_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.GET,
+    handler: CategoryController.getCategoryById,
+    permissions: [CATEGORY_PERMISSIONS.VIEW],
+  },
+];
+
+// Public routes
 router.get(CATEGORY_ROUTES.GET_BY_SLUG, CategoryController.getCategoryBySlug);
+
+// Dynamic route registration with authentication and permission checks
+managementRoutes.forEach((route) => {
+  const middlewares = [
+    AuthMiddleware.authenticate,
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
+    ...(route.middleware || []),
+  ];
+
+  router[route.method](route.path, ...middlewares, route.handler);
+});
+
 module.exports = router;

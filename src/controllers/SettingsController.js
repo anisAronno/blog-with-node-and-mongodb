@@ -13,6 +13,8 @@ class SettingsController {
   static async getPrivateSettings(req, res) {
     try {
       const settings = await SettingsService.getAllPrivateSettings(req.query);
+      console.log(settings);
+
       res.status(200).json({ settings });
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -30,10 +32,7 @@ class SettingsController {
 
   static async createSetting(req, res) {
     try {
-      const setting = await SettingsService.createSetting(
-        req.user._id,
-        req.body
-      );
+      const setting = await SettingsService.createSetting(req.user._id, req.body);
       res.status(201).json({ setting });
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -51,9 +50,7 @@ class SettingsController {
 
   static async getPrivateSettingByKey(req, res) {
     try {
-      const setting = await SettingsService.getPrivateSettingByKey(
-        req.params.key
-      );
+      const setting = await SettingsService.getPrivateSettingByKey(req.params.key);
       res.status(200).json({ setting });
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -62,9 +59,7 @@ class SettingsController {
 
   static async getPublicSettingByKey(req, res) {
     try {
-      const setting = await SettingsService.getPublicSettingByKey(
-        req.params.key
-      );
+      const setting = await SettingsService.getPublicSettingByKey(req.params.key);
       res.status(200).json({ setting });
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -73,10 +68,7 @@ class SettingsController {
 
   static async updateSetting(req, res) {
     try {
-      const setting = await SettingsService.updateSettingByKey(
-        req.params.key,
-        req.body
-      );
+      const setting = await SettingsService.updateSettingByKey(req.params.key, req.body);
       res.status(200).json({ setting });
     } catch (error) {
       res.status(400).json({ message: error.message });

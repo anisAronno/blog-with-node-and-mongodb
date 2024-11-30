@@ -1,103 +1,76 @@
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/User');
+const SettingsModel = require('../models/Settings');
+const Role = require('../models/Role');
+const User = require('../models/User');
 
 class AuthService {
-  // User Registration
-  async register(requestData) {
+  /**
+   * User Registration
+   */
+  async register(userData) {
     try {
-      // Check if user already exists
-      const existingUser = await UserModel.findOne({
-        $or: [{ email: requestData.email }, { username: requestData.username }],
+      const user = await UserModel.create({
+        ...userData,
+        roles: [],
       });
 
-      if (existingUser) {
-        throw new Error('User already exists');
+      const defaultUserRoleID = await SettingsModel.getSettingsByKey('default_user_role_id');
+      if (defaultUserRoleID) {
+        await user.attachRole(defaultUserRoleID.value);
       }
 
-      // Create new user
-      const user = await UserModel.create(requestData);
-
-      // Generate tokens
       const { accessToken, refreshToken } = user.generateTokens();
 
-      // Save user with new tokens
       await user.save();
 
       return {
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-        tokens: {
-          access: accessToken,
-          refresh: refreshToken,
-        },
+        ...(await this._formatUserResponse(user)),
+        tokens: { access: accessToken, refresh: refreshToken },
       };
     } catch (error) {
       throw new Error(`Registration failed: ${error.message}`);
     }
   }
 
-  // User Login
+  /**
+   * User Login
+   */
   async login(email, password) {
     try {
-      // Authenticate user
       const user = await UserModel.login(email, password);
-
-      // Generate new tokens
       const { accessToken, refreshToken } = user.generateTokens();
-
-      // Save user with new tokens
       await user.save();
 
       return {
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-        tokens: {
-          access: accessToken,
-          refresh: refreshToken,
-        },
+        ...(await this._formatUserResponse(user)),
+        tokens: { access: accessToken, refresh: refreshToken },
       };
     } catch (error) {
       throw new Error(`Login failed: ${error.message}`);
     }
   }
 
-  // Refresh Token
+  /**
+   * Refresh Token
+   */
   async refreshToken(refreshToken) {
     try {
-      // Verify refresh token
       const decoded = jwt.verify(refreshToken, APP_CONFIG.JWT_REFRESH_SECRET);
 
-      // Find user with this refresh token
       const user = await UserModel.findOne({
         _id: decoded.id,
         'tokens.token': refreshToken,
         'tokens.type': 'refresh',
       });
 
-      if (!user) {
-        throw new Error('Invalid refresh token');
-      }
+      if (!user) throw new Error('Invalid refresh token');
 
-      // Remove old tokens
       user.tokens = user.tokens.filter(
         (token) => token.type !== 'access' && token.type !== 'refresh'
       );
 
-      // Generate new tokens
-      const { accessToken, refreshToken: newRefreshToken } =
-        user.generateTokens();
-
-      // Save user with new tokens
+      const { accessToken, refreshToken: newRefreshToken } = user.generateTokens();
       await user.save();
 
       return {
@@ -109,60 +82,11 @@ class AuthService {
     }
   }
 
-  // Logout
-  async logout(userId, token) {
-    try {
-      // Find user and remove specific token
-      await UserModel.findByIdAndUpdate(userId, {
-        $pull: {
-          tokens: { token: token },
-        },
-      });
-
-      return true;
-    } catch (error) {
-      throw new Error(`Logout failed: ${error.message}`);
-    }
-  }
-
-  // Verify Token
-  async verifyToken(token, type = 'access') {
-    try {
-      // Choose appropriate secret based on token type
-      const secret =
-        type === 'access'
-          ? APP_CONFIG.JWT_ACCESS_SECRET
-          : APP_CONFIG.JWT_REFRESH_SECRET;
-
-      // Verify token
-      const decoded = jwt.verify(token, secret);
-
-      // Find user with this token
-      const user = await UserModel.findOne({
-        _id: decoded.id,
-        'tokens.token': token,
-        'tokens.type': type,
-      });
-
-      if (!user) {
-        throw new Error('Invalid token');
-      }
-
-      return { user, decoded };
-    } catch (error) {
-      throw new Error(`Token verification failed: ${error.message}`);
-    }
-  }
-
   // Change Password
   async changePassword(userId, oldPassword, newPassword) {
     try {
       // Change password using model method
-      const user = await UserModel.changePassword(
-        userId,
-        oldPassword,
-        newPassword
-      );
+      const user = await UserModel.changePassword(userId, oldPassword, newPassword);
 
       // Remove all existing tokens
       user.tokens = [];
@@ -174,67 +98,100 @@ class AuthService {
       await user.save();
 
       return {
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-        tokens: {
-          access: accessToken,
-          refresh: refreshToken,
-        },
+        ...(await this._formatUserResponse(user)),
+        tokens: { access: accessToken, refresh: refreshToken },
       };
     } catch (error) {
       throw new Error(`Password change failed: ${error.message}`);
     }
   }
 
-  // Get User Profile
-  async getUserProfile(userId) {
+  // Logout
+  async logout(userId) {
     try {
-      const user = await UserModel.findById(userId);
-
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      return {
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
+      // Find user and remove specific token
+      await UserModel.updateById(userId, {
+        $set: {
+          tokens: [],
         },
-      };
+      });
+
+      return true;
     } catch (error) {
-      throw new Error(`Get profile failed: ${error.message}`);
+      throw new Error(`Logout failed: ${error.message}`);
     }
   }
 
-  // updateProfile method
-  async updateProfile(authUser, requestData) {
+  async updateProfile(userId, updateData) {
     try {
-      const { email, name } = requestData;
-      const updatedUser = await UserModel.updateById(authUser.id, {
-        email,
-        name,
+      const allowedFields = ['username', 'email', 'name', 'active'];
+      const filteredData = Object.keys(updateData)
+        .filter((key) => allowedFields.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = updateData[key];
+          return obj;
+        }, {});
+
+      // Update user
+      const user = await User.select(['-password', '-tokens']).updateById(userId, filteredData);
+
+      if (!user) throw new Error('User not found');
+
+      return await this._formatUserResponse(user);
+    } catch (error) {
+      throw new Error(`Profile update failed: ${error.message}`);
+    }
+  }
+
+  async getUserProfile(userId) {
+    try {
+      const user = await UserModel.findById(userId);
+      if (!user) throw new Error('User not found');
+
+      return await this._formatUserResponse(user);
+    } catch (error) {
+      throw new Error(`Profile fetch failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Verify Token
+   */
+  async verifyToken(token, type = 'access') {
+    try {
+      const secret =
+        type === 'access' ? APP_CONFIG.JWT_ACCESS_SECRET : APP_CONFIG.JWT_REFRESH_SECRET;
+
+      const decoded = jwt.verify(token, secret);
+
+      const user = await UserModel.findOne({
+        _id: decoded.id,
+        'tokens.token': token,
+        'tokens.type': type,
       });
 
-      return {
-        user: {
-          id: updatedUser._id,
-          name: updatedUser.name,
-          username: updatedUser.username,
-          email: updatedUser.email,
-          role: updatedUser.role,
-        },
-      };
+      if (!user) throw new Error('Invalid token');
+      return { user, decoded };
     } catch (error) {
-      throw new Error(`Update profile failed: ${error.message}`);
+      throw new Error(`Token verification failed: ${error.message}`);
     }
+  }
+
+  /**
+   * Helper method to format user response
+   */
+  async _formatUserResponse(user) {
+    const roles = await Promise.all(
+      user.roles.map(async (roleId) => await Role.select('name').findById(roleId))
+    );
+
+    return {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      roles,
+    };
   }
 }
 

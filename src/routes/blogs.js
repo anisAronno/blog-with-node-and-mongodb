@@ -1,95 +1,113 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
-
-// Import Controllers
 const BlogController = require('../controllers/BlogController');
+const { createBlogValidator, updateBlogValidator } = require('../validation/blogRequestValidator');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
 
-// Import Validators
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
-const {
-  createBlogValidator,
-  updateBlogValidator,
-} = require('../validation/blogRequestValidator');
-
-// Blog routes - prefix: /api/v1/settings
-const BLOG_ROUTES = {
-  LIST: '', // GET    /api/v1/blogs
-  CREATE: '', // POST   /api/v1/blogs
-  PUBLISHED_LIST: '/published', // GET    /api/v1/blogs/published
-  USER_LIST: '/user/me', // GET    /api/v1/blogs/user/me
-  TAG_LIST: '/tag/:id', // GET    /api/v1/blogs/tag/:id
-  CATEGORY_LIST: '/category/:id', // GET    /api/v1/blogs/category/:id
-  GET_BY_SLUG: '/slug/:slug', // GET    /api/v1/blogs/slug/:slug
-  USER_PUBLISHED: '/user/:id/published', // GET    /api/v1/blogs/user/:id/published
-  TRASH_LIST: '/trash', // GET    /api/v1/blogs/trash
-
-  // Routes with :id parameter
-  GET: '/:id', // GET    /api/v1/blogs/:id
-  UPDATE: '/:id', // PUT    /api/v1/blogs/:id
-  DELETE: '/:id', // DELETE /api/v1/blogs/:id
-  RESTORE: '/:id/restore', // POST   /api/v1/blogs/:id/restore
-  REMOVE: '/:id/permanent', // DELETE /api/v1/blogs/:id/permanent
+// Permission Constants
+const BLOG_PERMISSIONS = {
+  VIEW: 'view_blog',
+  CREATE: 'create_blog',
+  EDIT: 'edit_blog',
+  DELETE: 'delete_blog',
 };
-/**
- * Blog Routes
- */
-// Public Blog Routes (specific routes first)
-router.get(BLOG_ROUTES.PUBLISHED_LIST, BlogController.getPublishedBlogs);
-router.get(
-  BLOG_ROUTES.USER_LIST,
-  AuthMiddleware.authenticate,
-  BlogController.getUserBlogs
-);
-router.get(BLOG_ROUTES.LIST, BlogController.getAllBlogs);
-router.get(
-  BLOG_ROUTES.TRASH_LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  BlogController.getTrashedBlogs
-);
-router.get(BLOG_ROUTES.TAG_LIST, BlogController.getBlogsByTag);
-router.get(BLOG_ROUTES.CATEGORY_LIST, BlogController.getBlogsByCategory);
-router.get(BLOG_ROUTES.GET_BY_SLUG, BlogController.getBlogBySlug);
-router.get(BLOG_ROUTES.USER_PUBLISHED, BlogController.getUserPublishedBlogs);
 
-// Post/Create route
-router.post(
-  BLOG_ROUTES.CREATE,
-  AuthMiddleware.authenticate,
-  createBlogValidator,
-  processedErrorResponse,
-  BlogController.createBlog
-);
+// Route constants
+const BLOG_ROUTES = {
+  PUBLIC: {
+    PUBLISHED_LIST: '/published',
+    GET_BY_SLUG: '/slug/:slug',
+    LIST: '/',
+  },
+  USER: {
+    LIST: '/user/me',
+    PUBLISHED: '/user/:id/published',
+  },
+  FILTERED: {
+    BY_TAG: '/tag/:id',
+    BY_CATEGORY: '/category/:id',
+  },
+  MANAGEMENT: {
+    TRASH_LIST: '/trash',
+    CREATE: '/',
+    GET: '/:id',
+    UPDATE: '/:id',
+    DELETE: '/:id',
+    RESTORE: '/:id/restore',
+    REMOVE: '/:id/permanent',
+  },
+};
 
-// Routes with :id parameter (at the end)
-router.get(BLOG_ROUTES.GET, BlogController.getBlogById);
-router.put(
-  BLOG_ROUTES.UPDATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'author']),
-  updateBlogValidator,
-  processedErrorResponse,
-  BlogController.updateBlog
-);
-router.delete(
-  BLOG_ROUTES.DELETE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin', 'author']),
-  BlogController.deleteBlog
-);
-router.post(
-  BLOG_ROUTES.RESTORE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  BlogController.restoreBlog
-);
-router.delete(
-  BLOG_ROUTES.REMOVE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  BlogController.removeBlog
-);
+// Public routes
+router.get(BLOG_ROUTES.PUBLIC.PUBLISHED_LIST, BlogController.getPublishedBlogs);
+router.get(BLOG_ROUTES.PUBLIC.GET_BY_SLUG, BlogController.getBlogBySlug);
+router.get(BLOG_ROUTES.PUBLIC.LIST, BlogController.getAllBlogs);
+
+// User-specific routes
+router.get(BLOG_ROUTES.USER.LIST, AuthMiddleware.authenticate, BlogController.getUserBlogs);
+router.get(BLOG_ROUTES.USER.PUBLISHED, BlogController.getUserPublishedBlogs);
+
+// Filtered routes
+router.get(BLOG_ROUTES.FILTERED.BY_TAG, BlogController.getBlogsByTag);
+router.get(BLOG_ROUTES.FILTERED.BY_CATEGORY, BlogController.getBlogsByCategory);
+
+// Management routes configuration
+const managementRoutes = [
+  {
+    method: 'get',
+    path: BLOG_ROUTES.MANAGEMENT.TRASH_LIST,
+    handler: BlogController.getTrashedBlogs,
+    permissions: [BLOG_PERMISSIONS.VIEW, BLOG_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: BLOG_ROUTES.MANAGEMENT.CREATE,
+    handler: BlogController.createBlog,
+    middleware: [createBlogValidator, processedErrorResponse],
+    permissions: [BLOG_PERMISSIONS.CREATE],
+  },
+  {
+    method: 'get',
+    path: BLOG_ROUTES.MANAGEMENT.GET,
+    handler: BlogController.getBlogById,
+    permissions: [BLOG_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'put',
+    path: BLOG_ROUTES.MANAGEMENT.UPDATE,
+    handler: BlogController.updateBlog,
+    middleware: [updateBlogValidator, processedErrorResponse],
+    permissions: [BLOG_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'delete',
+    path: BLOG_ROUTES.MANAGEMENT.DELETE,
+    handler: BlogController.deleteBlog,
+    permissions: [BLOG_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: BLOG_ROUTES.MANAGEMENT.RESTORE,
+    handler: BlogController.restoreBlog,
+    permissions: [BLOG_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'delete',
+    path: BLOG_ROUTES.MANAGEMENT.REMOVE,
+    handler: BlogController.removeBlog,
+    permissions: [BLOG_PERMISSIONS.DELETE],
+  },
+];
+
+// Dynamic route registration with authentication and permission checks
+managementRoutes.forEach((route) => {
+  const middlewares = [
+    AuthMiddleware.authenticate,
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
+    ...(route.middleware || []),
+  ];
+
+  router[route.method](route.path, ...middlewares, route.handler);
+});
 
 module.exports = router;

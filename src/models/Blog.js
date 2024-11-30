@@ -49,6 +49,10 @@ const blogSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    featured: {
+      type: Boolean,
+      default: false,
+    },
     deleted_at: {
       type: Date,
       default: null,
@@ -66,16 +70,18 @@ blogSchema.pre('validate', function (next) {
   next();
 });
 
+blogSchema.pre('save', function (next) {
+  if (this.published && !this.published_at) {
+    this.published_at = new Date();
+  }
+  next();
+});
+
 const BlogModel = mongoose.model('Blog', blogSchema);
 
 class Blog extends BaseModel {
   constructor() {
     super(BlogModel);
-    this.defaultPopulates = [
-      { path: 'tags', select: 'name description' },
-      { path: 'categories', select: 'name description' },
-      { path: 'author', select: 'email name username' },
-    ];
   }
 
   async publish(blogId) {

@@ -1,88 +1,92 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
-
-// Import Controllers
 const UserController = require('../controllers/UserController');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
+const { validateUpdateUser, validateCreateUser } = require('../validation/userRequestValidator');
 
-// Import Validators
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
-const {
-  validateUpdateUser,
-  validateCreateUser,
-} = require('../validation/userRequestValidator');
-
-// User routes - prefix: /api/v1/tags
-const USER_ROUTES = {
-  LIST: '', // GET    /api/v1/users
-  CREATE: '', // POST   /api/v1/users
-  GET: '/:id', // GET    /api/v1/users/:id
-  UPDATE: '/:id', // PUT    /api/v1/users/:id
-  DELETE: '/:id', // DELETE /api/v1/users/:id
-  RESTORE: '/:id/restore', // POST   /api/v1/users/:id/restore
-  REMOVE: '/:id/permanent', // DELETE /api/v1/users/:id/permanent
-  TRASH_LIST: '/trash', // GET    /api/v1/users/trash
+// Permission Constants
+const USER_PERMISSIONS = {
+  VIEW: 'view_user',
+  CREATE: 'create_user',
+  EDIT: 'edit_user',
+  DELETE: 'delete_user',
 };
-/**
- * User Routes
- */
 
-router.get(
-  USER_ROUTES.TRASH_LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  UserController.getTrashedUsers
-);
+// User routes
+const USER_ROUTES = {
+  LIST: '',
+  CREATE: '',
+  GET: '/:id',
+  UPDATE: '/:id',
+  DELETE: '/:id',
+  RESTORE: '/:id/restore',
+  REMOVE: '/:id/permanent',
+  TRASH_LIST: '/trash',
+};
 
-router.post(
-  USER_ROUTES.CREATE,
-  validateCreateUser,
-  processedErrorResponse,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  UserController.createUser
-);
+// Management routes configuration
+const managementRoutes = [
+  {
+    method: 'get',
+    path: USER_ROUTES.TRASH_LIST,
+    handler: UserController.getTrashedUsers,
+    permissions: [USER_PERMISSIONS.VIEW, USER_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: USER_ROUTES.CREATE,
+    handler: UserController.createUser,
+    middleware: [validateCreateUser, processedErrorResponse],
+    permissions: [USER_PERMISSIONS.CREATE],
+  },
+  {
+    method: 'get',
+    path: USER_ROUTES.LIST,
+    handler: UserController.getAllUsers,
+    permissions: [USER_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'get',
+    path: USER_ROUTES.GET,
+    handler: UserController.getUserById,
+    permissions: [USER_PERMISSIONS.VIEW],
+  },
+  {
+    method: 'put',
+    path: USER_ROUTES.UPDATE,
+    handler: UserController.updateUser,
+    middleware: [validateUpdateUser, processedErrorResponse],
+    permissions: [USER_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'delete',
+    path: USER_ROUTES.DELETE,
+    handler: UserController.deleteUser,
+    permissions: [USER_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'post',
+    path: USER_ROUTES.RESTORE,
+    handler: UserController.restoreUser,
+    permissions: [USER_PERMISSIONS.DELETE],
+  },
+  {
+    method: 'delete',
+    path: USER_ROUTES.REMOVE,
+    handler: UserController.removeUser,
+    permissions: [USER_PERMISSIONS.DELETE],
+  },
+];
 
-// Admin User Management Routes
-router.get(
-  USER_ROUTES.LIST,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  UserController.getAllUsers
-);
-router.get(
-  USER_ROUTES.GET,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  UserController.getUserById
-);
-router.put(
-  USER_ROUTES.UPDATE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  validateUpdateUser,
-  processedErrorResponse,
-  UserController.updateUser
-);
-router.delete(
-  USER_ROUTES.DELETE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  UserController.deleteUser
-);
+// Dynamic route registration with authentication and permission checks
+managementRoutes.forEach((route) => {
+  const middlewares = [
+    AuthMiddleware.authenticate,
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
+    ...(route.middleware || []),
+  ];
 
-router.post(
-  USER_ROUTES.RESTORE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin', 'admin']),
-  UserController.restoreUser
-);
-router.delete(
-  USER_ROUTES.REMOVE,
-  AuthMiddleware.authenticate,
-  AuthMiddleware.authorize(['superAdmin']),
-  UserController.removeUser
-);
+  router[route.method](route.path, ...middlewares, route.handler);
+});
 
 module.exports = router;

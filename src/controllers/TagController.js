@@ -27,9 +27,7 @@ class TagController {
     try {
       const tag = await TagService.getTagById(req.params.id);
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Tag not found' });
+        return res.status(404).json({ success: false, message: 'Tag not found' });
       }
       res.json({ success: true, tag: tag });
     } catch (error) {
@@ -43,9 +41,7 @@ class TagController {
       const { name } = req.body;
       const tag = await TagService.updateTag(req.params.id, { name });
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Tag not found' });
+        return res.status(404).json({ success: false, message: 'Tag not found' });
       }
 
       res.json({ success: true, tag: tag });
@@ -60,9 +56,7 @@ class TagController {
       const tag = await TagService.deleteTag(req.params.id);
 
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Tag not found' });
+        return res.status(404).json({ success: false, message: 'Tag not found' });
       }
 
       res.json({ success: true, message: 'Tag deleted successfully' });
@@ -77,9 +71,7 @@ class TagController {
       const tag = await TagService.restoreTag(req.params.id);
 
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Tag not found' });
+        return res.status(404).json({ success: false, message: 'Tag not found' });
       }
 
       res.json({ success: true, tag: tag });
@@ -94,9 +86,7 @@ class TagController {
       const tag = await TagService.forceDeleteTag(req.params.id);
 
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Tag not found' });
+        return res.status(404).json({ success: false, message: 'Tag not found' });
       }
 
       res.json({ success: true, message: 'Tag deleted permanently' });
@@ -120,9 +110,7 @@ class TagController {
     try {
       const tag = await TagService.getTagBySlug(req.params.slug);
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Tag not found' });
+        return res.status(404).json({ success: false, message: 'Tag not found' });
       }
       res.json({ success: true, tag: tag });
     } catch (error) {

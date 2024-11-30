@@ -26,9 +26,7 @@ class CategoryController {
     try {
       const category = await CategoryService.getCategoryById(req.params.id);
       if (!category) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Category not found' });
+        return res.status(404).json({ success: false, message: 'Category not found' });
       }
       res.json({ success: true, category: category });
     } catch (error) {
@@ -39,15 +37,10 @@ class CategoryController {
   // Update category
   async updateCategory(req, res) {
     try {
-      const category = await CategoryService.updateCategory(
-        req.params.id,
-        req.body
-      );
+      const category = await CategoryService.updateCategory(req.params.id, req.body);
 
       if (!category) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Category not found' });
+        return res.status(404).json({ success: false, message: 'Category not found' });
       }
       res.json({ success: true, category: category });
     } catch (error) {
@@ -60,9 +53,7 @@ class CategoryController {
     try {
       const response = await CategoryService.deleteCategory(req.params.id);
       if (!response) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Category not found' });
+        return res.status(404).json({ success: false, message: 'Category not found' });
       }
       res.json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
@@ -73,11 +64,11 @@ class CategoryController {
   // Restore category
   async restoreCategory(req, res) {
     try {
-      const category = await CategoryService.restoreCategory(req.params.id);
+      await CategoryService.restoreCategory(req.params.id);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        category,
+        message: 'Category restored successfully',
       });
     } catch (error) {
       res
@@ -164,13 +155,9 @@ class CategoryController {
 
   async getCategoryHierarchy(req, res) {
     try {
-      const category = await CategoryService.getCategoryWithHierarchy(
-        req.params.id
-      );
+      const category = await CategoryService.getCategoryWithHierarchy(req.params.id);
       if (!category) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Category not found' });
+        return res.status(404).json({ success: false, message: 'Category not found' });
       }
       res.json({ success: true, category });
     } catch (error) {
@@ -189,10 +176,7 @@ class CategoryController {
 
   async getSubcategories(req, res) {
     try {
-      const subcategories = await CategoryService.getSubcategories(
-        req.params.id,
-        req.query
-      );
+      const subcategories = await CategoryService.getSubcategories(req.params.id, req.query);
       res.json({ success: true, subcategories });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
@@ -202,10 +186,7 @@ class CategoryController {
   async moveCategory(req, res) {
     try {
       const { newParentId } = req.body;
-      const category = await CategoryService.moveCategory(
-        req.params.id,
-        newParentId
-      );
+      const category = await CategoryService.moveCategory(req.params.id, newParentId);
       res.json({ success: true, category });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });

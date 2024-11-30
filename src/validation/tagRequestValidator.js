@@ -9,9 +9,7 @@ const tagValidationRules = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Tag name must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9\s-]+$/)
-    .withMessage(
-      'Tag name can only contain letters, numbers, spaces, and hyphens'
-    )
+    .withMessage('Tag name can only contain letters, numbers, spaces, and hyphens')
     .custom(async (name) => await BaseHelper.isExists(Tag, { name: name })),
 ];
 
@@ -26,13 +24,8 @@ const updateTagValidator = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Tag name must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9\s-]+$/)
-    .withMessage(
-      'Tag name can only contain letters, numbers, spaces, and hyphens'
-    )
-    .custom(
-      async (name, { req }) =>
-        await BaseHelper.isExists(Tag, { name: name }, req.params.id)
-    ),
+    .withMessage('Tag name can only contain letters, numbers, spaces, and hyphens')
+    .custom(async (name, { req }) => await BaseHelper.isExists(Tag, { name: name }, req.params.id)),
 ];
 
 module.exports = {

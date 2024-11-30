@@ -56,10 +56,7 @@ class BlogController {
   // Get user published blogs
   async getUserPublishedBlogs(req, res) {
     try {
-      const blogs = await BlogService.getUserPublishedBlogs(
-        req.params.id,
-        req.query
-      );
+      const blogs = await BlogService.getUserPublishedBlogs(req.params.id, req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
@@ -80,6 +77,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.CREATED).json({
         success: true,
+        message: 'Blog created successfully',
         blog: BlogTransformer.transformBlog(blog),
       });
     } catch (error) {
@@ -120,6 +118,7 @@ class BlogController {
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
+        message: 'Blog updated successfully',
         blog: BlogTransformer.transformBlog(updatedBlog),
       });
     } catch (error) {
@@ -265,10 +264,7 @@ class BlogController {
   // Get blogs by category
   async getBlogsByCategory(req, res) {
     try {
-      const blogs = await BlogService.getBlogsByCategory(
-        req.params.id,
-        req.query
-      );
+      const blogs = await BlogService.getBlogsByCategory(req.params.id, req.query);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
