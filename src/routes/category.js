@@ -54,12 +54,6 @@ const managementRoutes = [
     permissions: [CATEGORY_PERMISSIONS.CREATE],
   },
   {
-    method: 'get',
-    path: CATEGORY_ROUTES.GET,
-    handler: CategoryController.getCategoryById,
-    permissions: [CATEGORY_PERMISSIONS.VIEW],
-  },
-  {
     method: 'put',
     path: CATEGORY_ROUTES.UPDATE,
     handler: CategoryController.updateCategory,
@@ -120,6 +114,12 @@ const managementRoutes = [
     path: CATEGORY_ROUTES.MOVE,
     handler: CategoryController.moveCategory,
     permissions: [CATEGORY_PERMISSIONS.EDIT],
+  },
+  {
+    method: 'get',
+    path: CATEGORY_ROUTES.GET,
+    handler: CategoryController.getCategoryById,
+    permissions: [CATEGORY_PERMISSIONS.VIEW],
   },
 ];
 

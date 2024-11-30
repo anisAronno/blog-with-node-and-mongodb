@@ -13,6 +13,8 @@ class SettingsController {
   static async getPrivateSettings(req, res) {
     try {
       const settings = await SettingsService.getAllPrivateSettings(req.query);
+      console.log(settings);
+
       res.status(200).json({ settings });
     } catch (error) {
       res.status(400).json({ message: error.message });

@@ -14,7 +14,8 @@ const userValidationRules = [
     .withMessage(
       'Username can only contain lowercase letters, numbers, dots, dashes, and underscores'
     )
-    .custom(async (username) => BaseHelper.isExists(User, { username: username })),
+    .custom(async (username) => BaseHelper.isExists(User, { username: username }))
+    .withMessage('Username already exists'),
 
   body('email')
     .trim()
@@ -22,7 +23,8 @@ const userValidationRules = [
     .withMessage('Please provide a valid email address')
     .normalizeEmail()
     .toLowerCase()
-    .custom(async (email) => await BaseHelper.isExists(User, { email: email })),
+    .custom(async (email) => await BaseHelper.isExists(User, { email: email }))
+    .withMessage('Email already exists'),
 
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 

@@ -89,7 +89,9 @@ const managementRoutes = [
 managementRoutes.forEach((route) => {
   const middlewares = [
     ...(route.path !== CONTACT_ROUTES.CREATE ? [AuthMiddleware.authenticate] : []),
-    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
+    ...(route.permissions.length > 0 && route.path !== CONTACT_ROUTES.CREATE
+      ? [AuthMiddleware.hasPermission(...route.permissions)]
+      : []),
     ...(route.middleware || []),
   ];
 

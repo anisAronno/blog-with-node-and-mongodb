@@ -64,11 +64,11 @@ class CategoryController {
   // Restore category
   async restoreCategory(req, res) {
     try {
-      const category = await CategoryService.restoreCategory(req.params.id);
+      await CategoryService.restoreCategory(req.params.id);
 
       res.status(HTTP_STATUS_CODE.OK).json({
         success: true,
-        category,
+        message: 'Category restored successfully',
       });
     } catch (error) {
       res

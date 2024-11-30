@@ -5,9 +5,16 @@ class SettingsService {
    * Get base query with common conditions
    */
   getBaseQuery(queryParams = {}) {
-    const { search, key, value, sort = 'createdAt' } = queryParams;
+    const { search, key, value, sort = 'createdAt', withRelations = true } = queryParams;
 
-    return Settings.search(search, ['key', 'value'])
+    let query = Settings;
+
+    if (withRelations) {
+      query = query.with(['author name,email,username']);
+    }
+
+    return query
+      .search(search, ['key', 'value'])
       .where('key', key)
       .where('value', value)
       .sort(sort);
@@ -29,7 +36,7 @@ class SettingsService {
         queryParams.page,
         queryParams.limit
       );
-      return this._populateAuthor(response);
+      return response;
     } catch (error) {
       throw new Error(`Failed to get settings: ${error.message}`);
     }

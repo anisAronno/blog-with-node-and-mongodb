@@ -11,7 +11,7 @@ class CategoryService {
 
     // Add common relations if needed
     if (withRelations) {
-      query = query.with(['author name,email,username']);
+      query = query.with(['author name,email,username', 'subcategories']);
     }
 
     // Apply common filters
@@ -75,7 +75,7 @@ class CategoryService {
     });
 
     // Return with populated relations
-    return Category.with(['author name,email,username']).findById(category._id);
+    return Category.with(['author name,email,username', 'subcategories']).findById(category._id);
   }
 
   /**
@@ -83,7 +83,7 @@ class CategoryService {
    */
   async createSubcategory(parentId, categoryData) {
     const category = await Category.createSubcategory(parentId, categoryData);
-    return Category.with(['author name,email,username']).findById(category._id);
+    return Category.with(['author name,email,username', 'subcategories']).findById(category._id);
   }
 
   /**
@@ -93,7 +93,7 @@ class CategoryService {
     let query = Category;
 
     if (withRelations) {
-      query = query.with(['author name,email,username']);
+      query = query.with(['author name,email,username', 'subcategories']);
     }
 
     const category = await query.findById(id);
@@ -118,7 +118,7 @@ class CategoryService {
     if (!updated) throw new Error('Category not found');
 
     // Return with populated relations
-    return Category.with(['author name,email,username']).findById(id);
+    return Category.with(['author name,email,username', 'subcategories']).findById(id);
   }
 
   /**
@@ -140,7 +140,8 @@ class CategoryService {
     };
 
     await deleteSubcategories(category);
-    await Category.deleteById(id);
+    const deleted = await Category.deleteById(id);
+    if (!deleted) throw new Error('Category not found');
     return true;
   }
 
@@ -148,7 +149,7 @@ class CategoryService {
    * Get category by slug
    */
   async getCategoryBySlug(slug) {
-    const category = await Category.with(['author name,email,username'])
+    const category = await Category.with(['author name,email,username', 'subcategories'])
       .where('slug', slug)
       .findOne();
 
@@ -164,7 +165,7 @@ class CategoryService {
     if (!category) throw new Error('Category not found');
 
     if (!category.parent) {
-      return Category.with(['author name,email,username']).findById(category._id);
+      return Category.with(['author name,email,username', 'subcategories']).findById(category._id);
     }
 
     // Check if parent is also restored
@@ -172,10 +173,12 @@ class CategoryService {
     if (!parent || parent.deleted_at) {
       // If parent is still deleted, move this to root level
       const updatedCategory = await Category.moveCategory(id, null);
-      return Category.with(['author name,email,username']).findById(updatedCategory._id);
+      return Category.with(['author name,email,username', 'subcategories']).findById(
+        updatedCategory._id
+      );
     }
 
-    return Category.with(['author name,email,username']).findById(category._id);
+    return Category.with(['author name,email,username', 'subcategories']).findById(category._id);
   }
 
   /**
@@ -193,7 +196,7 @@ class CategoryService {
   async moveCategory(categoryId, newParentId) {
     const category = await Category.moveCategory(categoryId, newParentId);
     if (!category) throw new Error('Category not found');
-    return Category.with(['author name,email,username']).findById(category._id);
+    return Category.with(['author name,email,username', 'subcategories']).findById(category._id);
   }
 
   /**
