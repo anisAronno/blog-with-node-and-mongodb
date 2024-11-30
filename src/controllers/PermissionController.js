@@ -1,11 +1,11 @@
-const Permission = require('../models/Permission');
+const PermissionService = require('../services/PermissionService');
 
 class PermissionController {
   // Create a new permission
   static async createPermission(req, res) {
     try {
       const { name } = req.body;
-      const permission = await Permission.create({ name });
+      const permission = await PermissionService.create({ name });
       res
         .status(HTTP_STATUS_CODE.CREATED)
         .json({ message: 'Permission created successfully', permission });
@@ -19,8 +19,7 @@ class PermissionController {
   // Get a single permission by ID
   static async viewPermission(req, res) {
     try {
-      const { id } = req.params;
-      const permission = await Permission.findById(id);
+      const permission = await PermissionService.getPermissionById(req.params.id);
       if (!permission) {
         return res.status(404).json({ message: 'Permission not found' });
       }
@@ -35,7 +34,7 @@ class PermissionController {
   // List all permissions
   static async listPermissions(req, res) {
     try {
-      const permissions = await Permission.paginate();
+      const permissions = await PermissionService.getAllPermissions(req.query);
       res.json({ permissions: permissions });
     } catch (error) {
       res
@@ -47,9 +46,8 @@ class PermissionController {
   // Update a permission by ID
   static async updatePermission(req, res) {
     try {
-      const { id } = req.params;
       const { name } = req.body;
-      const permission = await Permission.updateById(id, { name });
+      const permission = await PermissionService.updatePermission(req.params.id, { name });
       if (!permission) {
         return res.status(404).json({ message: 'Permission not found' });
       }
@@ -64,8 +62,7 @@ class PermissionController {
   // Delete a permission by ID
   static async deletePermission(req, res) {
     try {
-      const { id } = req.params;
-      const permission = await Permission.deleteById(id);
+      const permission = await PermissionService.deletePermission(req.params.id);
       if (!permission) {
         return res.status(404).json({ message: 'Permission not found' });
       }

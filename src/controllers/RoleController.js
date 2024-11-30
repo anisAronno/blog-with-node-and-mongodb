@@ -1,4 +1,4 @@
-const Role = require('../models/Role');
+const RoleService = require('../services/RoleService');
 
 class RoleController {
   // Create a new role with permissions
@@ -6,7 +6,7 @@ class RoleController {
     try {
       const { name, permissionIds } = req.body;
 
-      const role = await Role.create({ name, permissions: permissionIds });
+      const role = await RoleService.create({ name, permissions: permissionIds });
       res.status(201).json({ message: 'Role created successfully', role });
     } catch (error) {
       res
@@ -18,8 +18,7 @@ class RoleController {
   // Get a single role by ID (with permissions)
   static async viewRole(req, res) {
     try {
-      const { id } = req.params;
-      const role = await Role.with('permissions').findById(id);
+      const role = await RoleService.getRoleById(req.params.id);
       if (!role) {
         return res.status(404).json({ message: 'Role not found' });
       }
@@ -34,7 +33,7 @@ class RoleController {
   // List all roles (with permissions)
   static async listRoles(req, res) {
     try {
-      const roles = await Role.with('permissions').paginate();
+      const roles = await RoleService.getAllRoles();
       res.status(HTTP_STATUS_CODE.OK).json({ roles: roles });
     } catch (error) {
       res
@@ -46,10 +45,9 @@ class RoleController {
   // Update a role by ID (including permissions)
   static async updateRole(req, res) {
     try {
-      const { id } = req.params;
       const { name, permissionIds } = req.body;
 
-      const role = await Role.with('permissions').updateById(id, {
+      const role = await RoleService.updateRole(req.params.id, {
         name,
         permissions: permissionIds,
       });
@@ -69,8 +67,7 @@ class RoleController {
   // Delete a role by ID
   static async deleteRole(req, res) {
     try {
-      const { id } = req.params;
-      const role = await Role.deleteById(id);
+      const role = await RoleService.deleteRole(req.params.id);
       if (!role) {
         return res.status(404).json({ message: 'Role not found' });
       }
