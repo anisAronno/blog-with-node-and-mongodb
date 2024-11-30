@@ -9,12 +9,8 @@ const permissionValidationRules = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Permission name must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage(
-      'Permission name can only contain letters, numbers, underscores, and hyphens'
-    )
-    .custom(
-      async (name) => await BaseHelper.isExists(Permission, { name: name })
-    ),
+    .withMessage('Permission name can only contain letters, numbers, underscores, and hyphens')
+    .custom(async (name) => await BaseHelper.isExists(Permission, { name: name })),
 ];
 
 // Create permission validation
@@ -28,12 +24,9 @@ const updatePermissionValidator = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Permission name must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage(
-      'Permission name can only contain letters, numbers, underscores, and hyphens'
-    )
+    .withMessage('Permission name can only contain letters, numbers, underscores, and hyphens')
     .custom(
-      async (name, { req }) =>
-        await BaseHelper.isExists(Permission, { name: name }, req.params.id)
+      async (name, { req }) => await BaseHelper.isExists(Permission, { name: name }, req.params.id)
     ),
 ];
 

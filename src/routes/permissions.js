@@ -7,9 +7,7 @@ const {
   createPermissionValidator,
   updatePermissionValidator,
 } = require('../validation/permissionsRequestValidator.js');
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse.js');
+const { processedErrorResponse } = require('../validation/processedErrorResponse.js');
 
 // Permission Constants
 const PERMISSION_MANAGEMENT_PERMISSIONS = {
@@ -68,9 +66,7 @@ const managementRoutes = [
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

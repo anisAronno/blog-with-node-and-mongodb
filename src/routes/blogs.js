@@ -1,13 +1,8 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
 const BlogController = require('../controllers/BlogController');
-const {
-  createBlogValidator,
-  updateBlogValidator,
-} = require('../validation/blogRequestValidator');
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
+const { createBlogValidator, updateBlogValidator } = require('../validation/blogRequestValidator');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
 
 // Permission Constants
 const BLOG_PERMISSIONS = {
@@ -49,11 +44,7 @@ router.get(BLOG_ROUTES.PUBLIC.GET_BY_SLUG, BlogController.getBlogBySlug);
 router.get(BLOG_ROUTES.PUBLIC.LIST, BlogController.getAllBlogs);
 
 // User-specific routes
-router.get(
-  BLOG_ROUTES.USER.LIST,
-  AuthMiddleware.authenticate,
-  BlogController.getUserBlogs
-);
+router.get(BLOG_ROUTES.USER.LIST, AuthMiddleware.authenticate, BlogController.getUserBlogs);
 router.get(BLOG_ROUTES.USER.PUBLISHED, BlogController.getUserPublishedBlogs);
 
 // Filtered routes
@@ -112,9 +103,7 @@ const managementRoutes = [
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

@@ -11,19 +11,12 @@ const roleValidationRules = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Role name must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9\s-]+$/)
-    .withMessage(
-      'Role name can only contain letters, numbers, spaces, and hyphens'
-    )
+    .withMessage('Role name can only contain letters, numbers, spaces, and hyphens')
     .custom(async (name) => await BaseHelper.isExists(Role, { name: name })),
-  body('permissionIds')
-    .isArray()
-    .withMessage('Permission IDs must be an array'),
+  body('permissionIds').isArray().withMessage('Permission IDs must be an array'),
   body('permissionIds.*')
     .isMongoId()
-    .custom(
-      async (permissionId) =>
-        await BaseHelper.isExists(Permission, { _id: permissionId })
-    )
+    .custom(async (permissionId) => await BaseHelper.isExists(Permission, { _id: permissionId }))
     .withMessage('Invalid permission ID'),
 ];
 
@@ -38,24 +31,15 @@ const updateRoleValidator = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Role name must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9\s-]+$/)
-    .withMessage(
-      'Role name can only contain letters, numbers, spaces, and hyphens'
-    )
+    .withMessage('Role name can only contain letters, numbers, spaces, and hyphens')
     .custom(
-      async (name, { req }) =>
-        await BaseHelper.isExists(Role, { name: name }, req.params.id)
+      async (name, { req }) => await BaseHelper.isExists(Role, { name: name }, req.params.id)
     ),
-  body('permissionIds')
-    .optional()
-    .isArray()
-    .withMessage('Permission IDs must be an array'),
+  body('permissionIds').optional().isArray().withMessage('Permission IDs must be an array'),
   body('permissionIds.*')
     .optional()
     .isMongoId()
-    .custom(
-      async (permissionId) =>
-        await BaseHelper.isExists(Permission, { _id: permissionId })
-    )
+    .custom(async (permissionId) => await BaseHelper.isExists(Permission, { _id: permissionId }))
     .withMessage('Invalid permission ID'),
 ];
 

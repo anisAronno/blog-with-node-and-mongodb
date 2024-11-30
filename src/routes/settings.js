@@ -1,9 +1,7 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
 const SettingsController = require('../controllers/SettingsController');
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
 const {
   validateCreateSettings,
   validateUpdateSettings,
@@ -82,9 +80,7 @@ const managementRoutes = [
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 
@@ -93,9 +89,6 @@ managementRoutes.forEach((route) => {
 
 // Public routes
 router.get(SETTINGS_ROUTES.PUBLIC_LIST, SettingsController.getPublicSettings);
-router.get(
-  SETTINGS_ROUTES.PUBLIC_GET,
-  SettingsController.getPublicSettingByKey
-);
+router.get(SETTINGS_ROUTES.PUBLIC_GET, SettingsController.getPublicSettingByKey);
 
 module.exports = router;

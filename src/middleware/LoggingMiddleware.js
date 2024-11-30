@@ -6,10 +6,7 @@ const LoggingMiddleware = {
 
     res.on('finish', () => {
       const duration = Date.now() - startTime;
-      Logger.log(
-        'REQUEST',
-        `${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`
-      );
+      Logger.log('REQUEST', `${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
     });
 
     next();

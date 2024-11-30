@@ -5,13 +5,8 @@ const AuthMiddleware = require('../middleware/AuthMiddleware');
 const TagController = require('../controllers/TagController');
 
 // Import Validators
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
-const {
-  createTagValidator,
-  updateTagValidator,
-} = require('../validation/tagRequestValidator');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
+const { createTagValidator, updateTagValidator } = require('../validation/tagRequestValidator');
 
 // Permission Constants
 const TAG_PERMISSIONS = {
@@ -95,9 +90,7 @@ router.get(TAG_ROUTES.GET_BY_SLUG, TagController.getTagBySlug);
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

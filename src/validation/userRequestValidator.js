@@ -14,9 +14,7 @@ const userValidationRules = [
     .withMessage(
       'Username can only contain lowercase letters, numbers, dots, dashes, and underscores'
     )
-    .custom(async (username) =>
-      BaseHelper.isExists(User, { username: username })
-    ),
+    .custom(async (username) => BaseHelper.isExists(User, { username: username })),
 
   body('email')
     .trim()
@@ -26,15 +24,20 @@ const userValidationRules = [
     .toLowerCase()
     .custom(async (email) => await BaseHelper.isExists(User, { email: email })),
 
-  body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 
   body('name')
     .optional()
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Name must be between 3 and 50 characters'),
+
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match');
+    }
+    return true;
+  }),
 ];
 
 // Create user validation
@@ -66,8 +69,7 @@ const validateUpdateUser = [
     .normalizeEmail()
     .toLowerCase()
     .custom(
-      async (email, { req }) =>
-        await BaseHelper.isExists(User, { email: email }, req.params.id)
+      async (email, { req }) => await BaseHelper.isExists(User, { email: email }, req.params.id)
     ),
 
   body('password')

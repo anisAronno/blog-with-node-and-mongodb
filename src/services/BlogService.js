@@ -5,13 +5,7 @@ class BlogService {
    * Get base query with common relations and conditions
    */
   getBaseQuery(queryParams = {}) {
-    const {
-      search,
-      title,
-      description,
-      sort = 'createdAt',
-      withRelations = true,
-    } = queryParams;
+    const { search, title, description, sort = 'createdAt', withRelations = true } = queryParams;
 
     let query = Blog;
 
@@ -38,10 +32,7 @@ class BlogService {
    * Get all blogs with pagination
    */
   async getAllBlogs(queryParams = {}) {
-    return this.getBaseQuery(queryParams).paginate(
-      queryParams.page,
-      queryParams.limit
-    );
+    return this.getBaseQuery(queryParams).paginate(queryParams.page, queryParams.limit);
   }
 
   /**
@@ -213,10 +204,7 @@ class BlogService {
    * Get featured blogs
    */
   async getFeaturedBlogs(limit = 5) {
-    return this.getBaseQuery({ limit })
-      .where('featured', true)
-      .where('published', true)
-      .get();
+    return this.getBaseQuery({ limit }).where('featured', true).where('published', true).get();
   }
 
   /**
@@ -228,10 +216,7 @@ class BlogService {
     return this.getBaseQuery({ limit })
       .where('_id', { $ne: blogId })
       .where('published', true)
-      .orWhere([
-        { categories: { $in: blog.categories } },
-        { tags: { $in: blog.tags } },
-      ])
+      .orWhere([{ categories: { $in: blog.categories } }, { tags: { $in: blog.tags } }])
       .get();
   }
 }

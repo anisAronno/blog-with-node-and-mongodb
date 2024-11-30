@@ -88,11 +88,7 @@ class AuthController {
     try {
       const { oldPassword, newPassword } = req.body;
 
-      const result = await AuthService.changePassword(
-        req.user._id,
-        oldPassword,
-        newPassword
-      );
+      const result = await AuthService.changePassword(req.user._id, oldPassword, newPassword);
 
       res.status(200).json({
         success: true,

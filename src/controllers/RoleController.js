@@ -10,9 +10,7 @@ class RoleController {
         _id: { $in: permissionIds },
       });
       if (permissions.length !== permissionIds.length) {
-        return res
-          .status(400)
-          .json({ message: 'Some permissions are invalid' });
+        return res.status(400).json({ message: 'Some permissions are invalid' });
       }
 
       const role = await Role.create({ name, permissions: permissionIds });
@@ -62,9 +60,7 @@ class RoleController {
         _id: { $in: permissionIds },
       });
       if (permissions.length !== permissionIds.length) {
-        return res
-          .status(400)
-          .json({ message: 'Some permissions are invalid' });
+        return res.status(400).json({ message: 'Some permissions are invalid' });
       }
 
       const role = await Role.findByIdAndUpdate(

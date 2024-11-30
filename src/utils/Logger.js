@@ -16,7 +16,7 @@ class Logger {
           timestamp: new Date().toISOString(),
         };
 
-        // console.log(JSON.stringify(logMessage, null, 2));
+        console.log(JSON.stringify(logMessage, null, 2));
 
         resolve();
       } catch (error) {

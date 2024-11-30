@@ -33,18 +33,13 @@ const blogValidationRules = [
     .withMessage('Categories must be an array')
     .custom((categories) => {
       if (categories && categories.length > 0) {
-        return categories.every((category) =>
-          category.match(/^[0-9a-fA-F]{24}$/)
-        );
+        return categories.every((category) => category.match(/^[0-9a-fA-F]{24}$/));
       }
       return true;
     })
     .withMessage('Invalid category ID format'),
 
-  body('published')
-    .optional()
-    .isBoolean()
-    .withMessage('Published must be a boolean value'),
+  body('published').optional().isBoolean().withMessage('Published must be a boolean value'),
 ];
 
 // Create blog validation
@@ -58,8 +53,7 @@ const updateBlogValidator = [
     .isLength({ min: 3, max: 100 })
     .withMessage('Title must be between 3 and 100 characters')
     .custom(
-      async (title, { req }) =>
-        await BaseHelper.isExists(Blog, { title: title }, req.params.id)
+      async (title, { req }) => await BaseHelper.isExists(Blog, { title: title }, req.params.id)
     ),
 
   body('description')
@@ -86,18 +80,13 @@ const updateBlogValidator = [
     .withMessage('Categories must be an array')
     .custom((categories) => {
       if (categories && categories.length > 0) {
-        return categories.every((category) =>
-          category.match(/^[0-9a-fA-F]{24}$/)
-        );
+        return categories.every((category) => category.match(/^[0-9a-fA-F]{24}$/));
       }
       return true;
     })
     .withMessage('Invalid category ID format'),
 
-  body('published')
-    .optional()
-    .isBoolean()
-    .withMessage('Published must be a boolean value'),
+  body('published').optional().isBoolean().withMessage('Published must be a boolean value'),
 ];
 
 module.exports = {

@@ -4,9 +4,7 @@ const AuthMiddleware = require('../middleware/AuthMiddleware');
 // Import Controllers
 const RoleController = require('../controllers/RoleController.js');
 const UserRoleController = require('../controllers/UserRoleController.js');
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse.js');
+const { processedErrorResponse } = require('../validation/processedErrorResponse.js');
 const {
   createRoleValidator,
   updateRoleValidator,
@@ -97,9 +95,7 @@ const managementRoutes = [
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

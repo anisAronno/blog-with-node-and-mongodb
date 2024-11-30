@@ -9,19 +9,14 @@ const settingsValidationRules = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Key must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9_.-]+$/)
-    .withMessage(
-      'Key can only contain letters, numbers, dots, dashes, and underscores'
-    )
+    .withMessage('Key can only contain letters, numbers, dots, dashes, and underscores')
     .custom(async (key) => await BaseHelper.isExists(Settings, { key: key })),
 
   body('value').trim().notEmpty().withMessage('Value is required'),
 
   body('meta').optional().isObject().withMessage('Meta must be an object'),
 
-  body('private')
-    .optional()
-    .isBoolean()
-    .withMessage('Private must be a boolean value'),
+  body('private').optional().isBoolean().withMessage('Private must be a boolean value'),
 ];
 
 // Create settings validation
@@ -35,26 +30,16 @@ const validateUpdateSettings = [
     .isLength({ min: 2, max: 50 })
     .withMessage('Key must be between 2 and 50 characters')
     .matches(/^[a-zA-Z0-9_.-]+$/)
-    .withMessage(
-      'Key can only contain letters, numbers, dots, dashes, and underscores'
-    )
+    .withMessage('Key can only contain letters, numbers, dots, dashes, and underscores')
     .custom(
-      async (key, { req }) =>
-        await BaseHelper.isExists(Settings, { key: key }, req.params.id)
+      async (key, { req }) => await BaseHelper.isExists(Settings, { key: key }, req.params.id)
     ),
 
-  body('value')
-    .optional()
-    .trim()
-    .notEmpty()
-    .withMessage('Value cannot be empty if provided'),
+  body('value').optional().trim().notEmpty().withMessage('Value cannot be empty if provided'),
 
   body('meta').optional().isObject().withMessage('Meta must be an object'),
 
-  body('private')
-    .optional()
-    .isBoolean()
-    .withMessage('Private must be a boolean value'),
+  body('private').optional().isBoolean().withMessage('Private must be a boolean value'),
 ];
 
 module.exports = {

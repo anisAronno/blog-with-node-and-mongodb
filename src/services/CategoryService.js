@@ -5,13 +5,7 @@ class CategoryService {
    * Get base query with common relations and conditions
    */
   getBaseQuery(queryParams = {}) {
-    const {
-      search,
-      name,
-      description,
-      sort = 'createdAt',
-      withRelations = true,
-    } = queryParams;
+    const { search, name, description, sort = 'createdAt', withRelations = true } = queryParams;
 
     let query = Category;
 
@@ -34,10 +28,7 @@ class CategoryService {
    * Get all categories with pagination
    */
   async getAllCategories(queryParams = {}) {
-    return this.getBaseQuery(queryParams).paginate(
-      queryParams.page,
-      queryParams.limit
-    );
+    return this.getBaseQuery(queryParams).paginate(queryParams.page, queryParams.limit);
   }
 
   /**

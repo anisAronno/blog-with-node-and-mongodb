@@ -6,12 +6,7 @@ class UserService {
    * Get base query with common relations and conditions
    */
   getBaseQuery(queryParams = {}) {
-    const {
-      search,
-      name,
-      sort = 'createdAt',
-      withRelations = true,
-    } = queryParams;
+    const { search, name, sort = 'createdAt', withRelations = true } = queryParams;
 
     let query = User;
 
@@ -34,10 +29,7 @@ class UserService {
    * Get all users with pagination
    */
   async getAllUsers(queryParams = {}) {
-    return this.getBaseQuery(queryParams).paginate(
-      queryParams.page,
-      queryParams.limit
-    );
+    return this.getBaseQuery(queryParams).paginate(queryParams.page, queryParams.limit);
   }
 
   /**
@@ -90,9 +82,7 @@ class UserService {
       if (userData.roles?.length > 0) {
         await user.syncRoles(userData.roles);
       } else {
-        const defaultUserRoleID = await SettingsModel.getSettingsByKey(
-          'default_user_role_id'
-        );
+        const defaultUserRoleID = await SettingsModel.getSettingsByKey('default_user_role_id');
         if (defaultUserRoleID) {
           await user.attachRole(defaultUserRoleID.value);
         }
@@ -120,10 +110,7 @@ class UserService {
         }, {});
 
       // Update user
-      const user = await User.select(['-password', '-tokens']).updateById(
-        id,
-        filteredData
-      );
+      const user = await User.select(['-password', '-tokens']).updateById(id, filteredData);
 
       if (!user) throw new Error('User not found');
 
@@ -171,10 +158,7 @@ class UserService {
       query = query.with(['roles name', 'settings', 'profile']);
     }
 
-    const user = await query
-      .select(['-password', '-tokens'])
-      .where('email', email)
-      .findOne();
+    const user = await query.select(['-password', '-tokens']).where('email', email).findOne();
 
     if (!user) throw new Error('User not found');
     return user;

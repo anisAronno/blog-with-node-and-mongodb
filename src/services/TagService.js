@@ -5,12 +5,7 @@ class TagService {
    * Get base query with common relations and conditions
    */
   getBaseQuery(queryParams = {}) {
-    const {
-      search,
-      name,
-      sort = 'createdAt',
-      withRelations = true,
-    } = queryParams;
+    const { search, name, sort = 'createdAt', withRelations = true } = queryParams;
 
     let query = Tag;
 
@@ -20,10 +15,7 @@ class TagService {
     }
 
     // Apply common filters
-    query = query
-      .search(search, ['name'])
-      .where('name', name)
-      .sort(sort);
+    query = query.search(search, ['name']).where('name', name).sort(sort);
 
     return query;
   }
@@ -32,10 +24,7 @@ class TagService {
    * Get all tags with pagination
    */
   async getAllTags(queryParams = {}) {
-    return this.getBaseQuery(queryParams).paginate(
-      queryParams.page,
-      queryParams.limit
-    );
+    return this.getBaseQuery(queryParams).paginate(queryParams.page, queryParams.limit);
   }
 
   /**
@@ -106,9 +95,7 @@ class TagService {
    * Get tag by slug
    */
   async getTagBySlug(slug) {
-    const tag = await Tag.with(['author name,email,username'])
-      .where('slug', slug)
-      .findOne();
+    const tag = await Tag.with(['author name,email,username']).where('slug', slug).findOne();
 
     if (!tag) throw new Error('Tag not found');
     return tag;

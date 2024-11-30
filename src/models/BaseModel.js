@@ -92,11 +92,7 @@ class BaseModel {
 
     try {
       const [data, total] = await Promise.all([
-        this.model.find(
-          finalConditions,
-          this.query.options.select,
-          this.query.options
-        ),
+        this.model.find(finalConditions, this.query.options.select, this.query.options),
         this.model.countDocuments(finalConditions),
       ]);
 
@@ -136,9 +132,7 @@ class BaseModel {
   // Modified findById to handle relations consistently
   async findById(id) {
     const conditions = { _id: id, ...this.query.conditions };
-    return this.executeQuery(() =>
-      this.model.findOne(conditions, this.query.options.select)
-    );
+    return this.executeQuery(() => this.model.findOne(conditions, this.query.options.select));
   }
 
   // Keep other existing methods (findOne, update, delete, etc.)
@@ -208,9 +202,7 @@ class BaseModel {
       ...conditions,
     };
 
-    return this.executeQuery(() =>
-      this.model.findOne(finalConditions, this.query.options.select)
-    );
+    return this.executeQuery(() => this.model.findOne(finalConditions, this.query.options.select));
   }
 
   // Enhanced create/update methods with population
@@ -237,9 +229,7 @@ class BaseModel {
       ...this.query.conditions,
       ...conditions,
     };
-    return this.executeQuery(() =>
-      this.model.updateMany(finalConditions, updateData)
-    );
+    return this.executeQuery(() => this.model.updateMany(finalConditions, updateData));
   }
 
   // Enhanced delete methods
@@ -276,11 +266,7 @@ class BaseModel {
     };
 
     return this.executeQuery(() =>
-      this.model.findOneAndUpdate(
-        conditions,
-        { deleted_at: null },
-        { new: true }
-      )
+      this.model.findOneAndUpdate(conditions, { deleted_at: null }, { new: true })
     );
   }
 
@@ -294,16 +280,12 @@ class BaseModel {
       deleted_at: { $ne: null },
     };
 
-    return this.executeQuery(() =>
-      this.model.updateMany(finalConditions, { deleted_at: null })
-    );
+    return this.executeQuery(() => this.model.updateMany(finalConditions, { deleted_at: null }));
   }
 
   async forceDelete(id) {
     if (!this.hasSoftDelete) {
-      throw new Error(
-        'Force delete is only available for models with soft delete'
-      );
+      throw new Error('Force delete is only available for models with soft delete');
     }
 
     const conditions = {
@@ -328,9 +310,7 @@ class BaseModel {
   async exists(conditions) {
     const finalConditions = {
       ...conditions,
-      ...(this.hasSoftDelete && !this.query.includeTrashed
-        ? { deleted_at: null }
-        : {}),
+      ...(this.hasSoftDelete && !this.query.includeTrashed ? { deleted_at: null } : {}),
     };
 
     return this.executeQuery(() => this.model.exists(finalConditions));
@@ -339,9 +319,7 @@ class BaseModel {
   async count(conditions = {}) {
     const finalConditions = {
       ...conditions,
-      ...(this.hasSoftDelete && !this.query.includeTrashed
-        ? { deleted_at: null }
-        : {}),
+      ...(this.hasSoftDelete && !this.query.includeTrashed ? { deleted_at: null } : {}),
     };
 
     return this.executeQuery(() => this.model.countDocuments(finalConditions));

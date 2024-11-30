@@ -22,9 +22,7 @@ const CONTACT_ROUTES = {
 };
 
 // Import Validators
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
 const {
   createContactValidator,
   updateContactValidator,
@@ -90,15 +88,11 @@ const managementRoutes = [
 // Dynamic route registration with authentication and permission checks
 managementRoutes.forEach((route) => {
   const middlewares = [
-    ...(route.path !== CONTACT_ROUTES.CREATE
-      ? [AuthMiddleware.authenticate]
-      : []),
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.path !== CONTACT_ROUTES.CREATE ? [AuthMiddleware.authenticate] : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
-  
+
   router[route.method](route.path, ...middlewares, route.handler);
 });
 

@@ -15,9 +15,7 @@ class AuthService {
         roles: [],
       });
 
-      const defaultUserRoleID = await SettingsModel.getSettingsByKey(
-        'default_user_role_id'
-      );
+      const defaultUserRoleID = await SettingsModel.getSettingsByKey('default_user_role_id');
       if (defaultUserRoleID) {
         await user.attachRole(defaultUserRoleID.value);
       }
@@ -45,7 +43,7 @@ class AuthService {
       await user.save();
 
       return {
-        ...await this._formatUserResponse(user),
+        ...(await this._formatUserResponse(user)),
         tokens: { access: accessToken, refresh: refreshToken },
       };
     } catch (error) {
@@ -72,8 +70,7 @@ class AuthService {
         (token) => token.type !== 'access' && token.type !== 'refresh'
       );
 
-      const { accessToken, refreshToken: newRefreshToken } =
-        user.generateTokens();
+      const { accessToken, refreshToken: newRefreshToken } = user.generateTokens();
       await user.save();
 
       return {
@@ -89,11 +86,7 @@ class AuthService {
   async changePassword(userId, oldPassword, newPassword) {
     try {
       // Change password using model method
-      const user = await UserModel.changePassword(
-        userId,
-        oldPassword,
-        newPassword
-      );
+      const user = await UserModel.changePassword(userId, oldPassword, newPassword);
 
       // Remove all existing tokens
       user.tokens = [];
@@ -117,11 +110,11 @@ class AuthService {
   async logout(userId) {
     try {
       // Find user and remove specific token
-    await UserModel.updateById(userId, {
-      $set: {
-        tokens: [],
-      },
-    });
+      await UserModel.updateById(userId, {
+        $set: {
+          tokens: [],
+        },
+      });
 
       return true;
     } catch (error) {
@@ -140,10 +133,7 @@ class AuthService {
         }, {});
 
       // Update user
-      const user = await User.select(['-password', '-tokens']).updateById(
-        userId,
-        filteredData
-      );
+      const user = await User.select(['-password', '-tokens']).updateById(userId, filteredData);
 
       if (!user) throw new Error('User not found');
 
@@ -170,12 +160,10 @@ class AuthService {
   async verifyToken(token, type = 'access') {
     try {
       const secret =
-        type === 'access'
-          ? APP_CONFIG.JWT_ACCESS_SECRET
-          : APP_CONFIG.JWT_REFRESH_SECRET;
+        type === 'access' ? APP_CONFIG.JWT_ACCESS_SECRET : APP_CONFIG.JWT_REFRESH_SECRET;
 
       const decoded = jwt.verify(token, secret);
-      
+
       const user = await UserModel.findOne({
         _id: decoded.id,
         'tokens.token': token,
@@ -194,9 +182,7 @@ class AuthService {
    */
   async _formatUserResponse(user) {
     const roles = await Promise.all(
-      user.roles.map(
-        async (roleId) => await Role.select('name').findById(roleId)
-      )
+      user.roles.map(async (roleId) => await Role.select('name').findById(roleId))
     );
 
     return {

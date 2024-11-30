@@ -65,10 +65,7 @@ class AuthMiddleware {
   static hasPermission(permission) {
     return async (req, res, next) => {
       try {
-        const hasPermission = await AuthMiddleware.checkUserPermissions(
-          req.user,
-          permission
-        );
+        const hasPermission = await AuthMiddleware.checkUserPermissions(req.user, permission);
 
         if (!hasPermission) {
           return res.status(HTTP_STATUS_CODE.FORBIDDEN).json({
@@ -104,11 +101,7 @@ class AuthMiddleware {
       }
 
       // Check model-specific permissions with a more generic approach
-      const hasPermission = await AuthMiddleware.checkModelPermission(
-        req.user,
-        model,
-        data
-      );
+      const hasPermission = await AuthMiddleware.checkModelPermission(req.user, model, data);
 
       if (hasPermission) {
         req[`${modelName}`] = data;

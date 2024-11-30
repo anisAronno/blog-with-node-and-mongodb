@@ -20,10 +20,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [
-        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-        'Please fill a valid email address',
-      ],
+      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address'],
     },
     password: {
       type: String,
@@ -133,9 +130,7 @@ userSchema.methods = {
     if (!this.hasRole(roleId)) {
       throw new Error('Role not attached');
     }
-    this.roles = this.roles.filter(
-      (role) => role._id.toString() !== roleId.toString()
-    );
+    this.roles = this.roles.filter((role) => role._id.toString() !== roleId.toString());
 
     return await this.save();
   },
@@ -146,9 +141,7 @@ userSchema.methods = {
     }
 
     const uniqueRoleIds = [...new Set(roleIds)];
-    const validRoleIds = uniqueRoleIds.filter((id) =>
-      mongoose.Types.ObjectId.isValid(id)
-    );
+    const validRoleIds = uniqueRoleIds.filter((id) => mongoose.Types.ObjectId.isValid(id));
 
     this.roles = validRoleIds;
 
@@ -165,7 +158,8 @@ class User extends BaseModel {
 
   async login(email, password) {
     try {
-      const user = await this.model.findOne({ email: email.toLowerCase() });
+      const user = await this.model.findOne({ email: email });
+
       if (!user || !(await user.comparePassword(password))) {
         throw new Error('Invalid credentials');
       }

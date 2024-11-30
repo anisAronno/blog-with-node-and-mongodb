@@ -10,9 +10,7 @@ const {
 } = require('../validation/categoryRequestValidator');
 
 // Import Validators
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
 
 // Permission Constants
 const CATEGORY_PERMISSIONS = {
@@ -132,9 +130,7 @@ router.get(CATEGORY_ROUTES.GET_BY_SLUG, CategoryController.getCategoryBySlug);
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

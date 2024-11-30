@@ -1,4 +1,3 @@
-
 const Settings = require('../models/Settings');
 
 class SettingsService {
@@ -6,15 +5,9 @@ class SettingsService {
    * Get base query with common conditions
    */
   getBaseQuery(queryParams = {}) {
-    const {
-      search,
-      key,
-      value,
-      sort = 'createdAt',
-    } = queryParams;
+    const { search, key, value, sort = 'createdAt' } = queryParams;
 
-    return Settings
-      .search(search, ['key', 'value'])
+    return Settings.search(search, ['key', 'value'])
       .where('key', key)
       .where('value', value)
       .sort(sort);
@@ -32,8 +25,10 @@ class SettingsService {
    */
   async getAllSettings(queryParams = {}) {
     try {
-      const response = await this.getBaseQuery(queryParams)
-        .paginate(queryParams.page, queryParams.limit);
+      const response = await this.getBaseQuery(queryParams).paginate(
+        queryParams.page,
+        queryParams.limit
+      );
       return this._populateAuthor(response);
     } catch (error) {
       throw new Error(`Failed to get settings: ${error.message}`);
@@ -132,11 +127,9 @@ class SettingsService {
    */
   async updateSettingByKey(key, updateData) {
     try {
-      const setting = await Settings.findOneAndUpdate(
-        { key },
-        updateData,
-        { new: true }
-      );
+      const setting = await Settings.findOneAndUpdate({ key }, updateData, {
+        new: true,
+      });
       if (!setting) throw new Error('Setting not found');
       return this._populateAuthor(setting);
     } catch (error) {

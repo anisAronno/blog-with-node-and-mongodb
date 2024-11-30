@@ -26,8 +26,7 @@ class BaseHelper {
    */
   static strRandom(length = 20, type = 'alphanumeric') {
     const charSets = {
-      alphanumeric:
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+      alphanumeric: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
       numeric: '0123456789',
       alpha: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
     };

@@ -1,13 +1,8 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
 const AuthController = require('../controllers/AuthController');
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
-const {
-  validateCreateUser,
-  validateUpdateUser,
-} = require('../validation/userRequestValidator');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
+const { validateCreateUser, validateUpdateUser } = require('../validation/userRequestValidator');
 
 // Permission Constants
 const AUTH_PERMISSIONS = {
@@ -77,14 +72,10 @@ const authRoutes = [
 // Dynamic route registration with authentication and permission checks
 authRoutes.forEach((route) => {
   const middlewares = [
-    ...(route.path !== '/login' &&
-    route.path !== '/register' &&
-    route.path !== '/refresh-token'
+    ...(route.path !== '/login' && route.path !== '/register' && route.path !== '/refresh-token'
       ? [AuthMiddleware.authenticate]
       : []),
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

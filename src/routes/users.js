@@ -1,13 +1,8 @@
 const router = require('express').Router();
 const AuthMiddleware = require('../middleware/AuthMiddleware');
 const UserController = require('../controllers/UserController');
-const {
-  processedErrorResponse,
-} = require('../validation/processedErrorResponse');
-const {
-  validateUpdateUser,
-  validateCreateUser,
-} = require('../validation/userRequestValidator');
+const { processedErrorResponse } = require('../validation/processedErrorResponse');
+const { validateUpdateUser, validateCreateUser } = require('../validation/userRequestValidator');
 
 // Permission Constants
 const USER_PERMISSIONS = {
@@ -87,9 +82,7 @@ const managementRoutes = [
 managementRoutes.forEach((route) => {
   const middlewares = [
     AuthMiddleware.authenticate,
-    ...(route.permissions.length > 0
-      ? [AuthMiddleware.hasPermission(...route.permissions)]
-      : []),
+    ...(route.permissions.length > 0 ? [AuthMiddleware.hasPermission(...route.permissions)] : []),
     ...(route.middleware || []),
   ];
 

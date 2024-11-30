@@ -71,9 +71,7 @@ categorySchema.pre('validate', async function (next) {
 
       // Check if parent's level is already at max (2)
       if (parentCategory.level >= 2) {
-        throw new Error(
-          'Cannot create subcategory: Maximum nesting level reached'
-        );
+        throw new Error('Cannot create subcategory: Maximum nesting level reached');
       }
 
       // Set the current category's level
@@ -132,9 +130,7 @@ class Category extends BaseModel {
       }
 
       if (parent.level >= 2) {
-        throw new Error(
-          'Cannot create subcategory: Maximum nesting level reached'
-        );
+        throw new Error('Cannot create subcategory: Maximum nesting level reached');
       }
 
       const subcategoryData = {
@@ -177,9 +173,7 @@ class Category extends BaseModel {
 
         // Check if new parent's level would exceed maximum
         if (newParent.level >= 2) {
-          throw new Error(
-            'Cannot move category: Maximum nesting level would be exceeded'
-          );
+          throw new Error('Cannot move category: Maximum nesting level would be exceeded');
         }
 
         // Update the category's level and parent

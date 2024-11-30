@@ -33,10 +33,7 @@ class ContactController {
 
   async updateContact(req, res) {
     try {
-      const contact = await ContactService.updateContact(
-        req.params.id,
-        req.body
-      );
+      const contact = await ContactService.updateContact(req.params.id, req.body);
       if (!contact) {
         return res.status(404).json({ message: 'Contact not found' });
       }

@@ -28,12 +28,10 @@ class AppServer {
   setupMiddleware() {
     // Basic middleware
     this.app.use(express.json({ limit: APP_CONFIG.REQUEST_LIMIT }));
-    this.app.use(
-      express.urlencoded({ extended: true, limit: APP_CONFIG.REQUEST_LIMIT })
-    );
+    this.app.use(express.urlencoded({ extended: true, limit: APP_CONFIG.REQUEST_LIMIT }));
 
     // CORS middleware
-    this.app.use(cors);
+    this.app.use(cors());
 
     // Custom middleware
     this.app.use(LoggingMiddleware.requestLogger);

@@ -16,8 +16,7 @@ class ContactService {
       sort = 'createdAt',
     } = queryParams;
 
-    return Contact
-      .search(search, ['name', 'email', 'phone', 'message', 'subject'])
+    return Contact.search(search, ['name', 'email', 'phone', 'message', 'subject'])
       .where('name', name)
       .where('email', email)
       .where('phone', phone)
@@ -32,10 +31,7 @@ class ContactService {
    */
   async getAllContacts(queryParams = {}) {
     try {
-      return await this.getBaseQuery(queryParams).paginate(
-        queryParams.page,
-        queryParams.limit
-      );
+      return await this.getBaseQuery(queryParams).paginate(queryParams.page, queryParams.limit);
     } catch (error) {
       throw new Error(`Failed to get contacts: ${error.message}`);
     }
@@ -135,8 +131,10 @@ class ContactService {
    */
   async getContactsByEmail(email, queryParams = {}) {
     try {
-      return await this.getBaseQuery({ ...queryParams, email })
-        .paginate(queryParams.page, queryParams.limit);
+      return await this.getBaseQuery({ ...queryParams, email }).paginate(
+        queryParams.page,
+        queryParams.limit
+      );
     } catch (error) {
       throw new Error(`Failed to get contacts by email: ${error.message}`);
     }
@@ -147,8 +145,10 @@ class ContactService {
    */
   async getContactsByPhone(phone, queryParams = {}) {
     try {
-      return await this.getBaseQuery({ ...queryParams, phone })
-        .paginate(queryParams.page, queryParams.limit);
+      return await this.getBaseQuery({ ...queryParams, phone }).paginate(
+        queryParams.page,
+        queryParams.limit
+      );
     } catch (error) {
       throw new Error(`Failed to get contacts by phone: ${error.message}`);
     }
