@@ -16,7 +16,8 @@ const roleValidationRules = [
   body('permissionIds').isArray().withMessage('Permission IDs must be an array'),
   body('permissionIds.*')
     .isMongoId()
-    .custom(async (permissionId) => await BaseHelper.isExists(Permission, { _id: permissionId }))
+    .withMessage('Invalid permission ID')
+    .custom(async (permissionId) => await BaseHelper.isNotExists(Permission, { _id: permissionId }))
     .withMessage('Invalid permission ID'),
 ];
 
@@ -39,42 +40,37 @@ const updateRoleValidator = [
   body('permissionIds.*')
     .optional()
     .isMongoId()
-    .custom(async (permissionId) => await BaseHelper.isExists(Permission, { _id: permissionId }))
+    .withMessage('Invalid permission ID')
+    .custom(async (permissionId) => await BaseHelper.isNotExists(Permission, { _id: permissionId }))
     .withMessage('Invalid permission ID'),
 ];
 
 const attachRoleValidator = [
   body('userId')
     .isMongoId()
-    .custom(async (userId) => await BaseHelper.isExists(User, { _id: userId }))
-    .withMessage('Invalid user ID'),
-  body('roleId')
-    .isMongoId()
-    .custom(async (roleId) => await BaseHelper.isExists(Role, { _id: roleId }))
-    .withMessage('Invalid role ID'),
+    .withMessage('Invalid user ID')
+    .custom(async (userId) => BaseHelper.isNotExists(User, { _id: userId }))
+    .withMessage('User not found'),
+  body('roleId').isMongoId().withMessage('Invalid role ID'),
 ];
 
 const detachRoleValidator = [
   body('userId')
     .isMongoId()
-    .custom(async (userId) => await BaseHelper.isExists(User, { _id: userId }))
-    .withMessage('Invalid user ID'),
-  body('roleId')
-    .isMongoId()
-    .custom(async (roleId) => await BaseHelper.isExists(Role, { _id: roleId }))
-    .withMessage('Invalid role ID'),
+    .withMessage('Invalid user ID')
+    .custom(async (userId) => BaseHelper.isNotExists(User, { _id: userId }))
+    .withMessage('User not found'),
+  body('roleId').isMongoId().withMessage('Invalid role ID'),
 ];
 
 const syncRolesValidator = [
   body('userId')
     .isMongoId()
-    .custom(async (userId) => await BaseHelper.isExists(User, { _id: userId }))
-    .withMessage('Invalid user ID'),
+    .withMessage('Invalid user ID')
+    .custom(async (userId) => BaseHelper.isNotExists(User, { _id: userId }))
+    .withMessage('User not found'),
   body('roleIds').isArray().withMessage('Role IDs must be an array'),
-  body('roleIds.*')
-    .isMongoId()
-    .custom(async (roleId) => await BaseHelper.isExists(Role, { _id: roleId }))
-    .withMessage('Invalid role ID'),
+  body('roleIds.*').isMongoId().withMessage('Invalid role ID'),
 ];
 
 module.exports = {

@@ -24,7 +24,7 @@ class PermissionController {
       if (!permission) {
         return res.status(404).json({ message: 'Permission not found' });
       }
-      res.json(permission);
+      res.json({ permission: permission });
     } catch (error) {
       res
         .status(HTTP_STATUS_CODE.BAD_REQUEST)
@@ -36,7 +36,7 @@ class PermissionController {
   static async listPermissions(req, res) {
     try {
       const permissions = await Permission.paginate();
-      res.json(permissions);
+      res.json({ permissions: permissions });
     } catch (error) {
       res
         .status(HTTP_STATUS_CODE.BAD_REQUEST)
@@ -49,7 +49,7 @@ class PermissionController {
     try {
       const { id } = req.params;
       const { name } = req.body;
-      const permission = await Permission.findByIdAndUpdate(id, { name }, { new: true });
+      const permission = await Permission.updateById(id, { name });
       if (!permission) {
         return res.status(404).json({ message: 'Permission not found' });
       }
@@ -65,7 +65,7 @@ class PermissionController {
   static async deletePermission(req, res) {
     try {
       const { id } = req.params;
-      const permission = await Permission.findByIdAndDelete(id);
+      const permission = await Permission.deleteById(id);
       if (!permission) {
         return res.status(404).json({ message: 'Permission not found' });
       }

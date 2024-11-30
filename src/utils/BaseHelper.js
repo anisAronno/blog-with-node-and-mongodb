@@ -64,6 +64,26 @@ class BaseHelper {
     }
     return true;
   }
+
+  /**
+   *
+   * @param {BaseModel} modelName
+   * @param {string} title
+   * @param {?string} currentId
+   * @returns {Promise<boolean>}
+   */
+  static async isNotExists(modelName, query, currentId = null) {
+    if (currentId) {
+      query._id = { $ne: currentId };
+    }
+    const model = await modelName.findOne(query);
+
+    if (!model) {
+      throw new Error(`${Object.keys(query).length > 0 ? Object.keys(query)[0] : ''} not found`);
+    }
+
+    return true;
+  }
 }
 
 module.exports = BaseHelper;

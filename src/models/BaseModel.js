@@ -60,6 +60,11 @@ class BaseModel {
     return this.buildQuery(field, value);
   }
 
+  whereIn(field, values) {
+    this.query.conditions[field] = { $in: values };
+    return this;
+  }
+
   orWhere(conditions) {
     this.query.conditions.$or = conditions;
     return this;
@@ -133,6 +138,12 @@ class BaseModel {
   async findById(id) {
     const conditions = { _id: id, ...this.query.conditions };
     return this.executeQuery(() => this.model.findOne(conditions, this.query.options.select));
+  }
+
+  // Modified findByIds to handle relations consistently
+  async findByIds(ids) {
+    const conditions = { _id: { $in: ids }, ...this.query.conditions };
+    return this.executeQuery(() => this.model.find(conditions, this.query.options.select));
   }
 
   // Keep other existing methods (findOne, update, delete, etc.)

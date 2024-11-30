@@ -1,17 +1,10 @@
 const Role = require('../models/Role');
-const Permission = require('../models/Permission');
 
 class RoleController {
   // Create a new role with permissions
   static async createRole(req, res) {
     try {
       const { name, permissionIds } = req.body;
-      const permissions = await Permission.model.find({
-        _id: { $in: permissionIds },
-      });
-      if (permissions.length !== permissionIds.length) {
-        return res.status(400).json({ message: 'Some permissions are invalid' });
-      }
 
       const role = await Role.create({ name, permissions: permissionIds });
       res.status(201).json({ message: 'Role created successfully', role });
@@ -26,7 +19,7 @@ class RoleController {
   static async viewRole(req, res) {
     try {
       const { id } = req.params;
-      const role = await Role.findById(id).populate('permissions');
+      const role = await Role.with('permissions').findById(id);
       if (!role) {
         return res.status(404).json({ message: 'Role not found' });
       }
@@ -41,8 +34,8 @@ class RoleController {
   // List all roles (with permissions)
   static async listRoles(req, res) {
     try {
-      const roles = await Role.model.find().populate('permissions');
-      res.status(HTTP_STATUS_CODE.OK).json({ roles });
+      const roles = await Role.with('permissions').paginate();
+      res.status(HTTP_STATUS_CODE.OK).json({ roles: roles });
     } catch (error) {
       res
         .status(HTTP_STATUS_CODE.BAD_REQUEST)
@@ -56,18 +49,10 @@ class RoleController {
       const { id } = req.params;
       const { name, permissionIds } = req.body;
 
-      const permissions = await Permission.find({
-        _id: { $in: permissionIds },
+      const role = await Role.with('permissions').updateById(id, {
+        name,
+        permissions: permissionIds,
       });
-      if (permissions.length !== permissionIds.length) {
-        return res.status(400).json({ message: 'Some permissions are invalid' });
-      }
-
-      const role = await Role.findByIdAndUpdate(
-        id,
-        { name, permissions: permissionIds },
-        { new: true }
-      ).populate('permissions');
 
       if (!role) {
         return res.status(404).json({ message: 'Role not found' });
@@ -85,7 +70,7 @@ class RoleController {
   static async deleteRole(req, res) {
     try {
       const { id } = req.params;
-      const role = await Role.findByIdAndDelete(id);
+      const role = await Role.deleteById(id);
       if (!role) {
         return res.status(404).json({ message: 'Role not found' });
       }
